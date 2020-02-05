@@ -175,7 +175,7 @@ Notes
 
 '''  #PYCHOK expected
 
-from __future__ import generators  #PYCHOK for yield in Python 2.2
+  #PYCHOK for yield in Python 2.2
 
 from inspect	import isbuiltin, isclass, iscode, isframe, \
 					   isfunction, ismethod, ismodule, stack
@@ -228,14 +228,14 @@ _sizeof_Csetentry	   = calcsize('lP')   # sizeof(setentry)
 
  # XXX use sys.int_info.sizeof_digit in Python 3.1
 try:  # C typedef digit for multi-precision int (or long)
-	_sizeof_Cdigit = long.__itemsize__
+	_sizeof_Cdigit = int.__itemsize__
 except NameError:  # no long in Python 3.0
 	_sizeof_Cdigit = int.__itemsize__
 if _sizeof_Cdigit < 2:
 	raise AssertionError('sizeof(%s) bad: %d' % ('digit', _sizeof_Cdigit))
 
 try:  # sizeof(unicode_char)
-	u = unicode('\0')
+	u = str('\0')
 except NameError:  # no unicode() in Python 3.0
 	u = '\0'
 u = u.encode('unicode-internal')  # see .../Lib/test/test_sys.py
@@ -516,7 +516,7 @@ def _printf(fmt, *args, **print3opts):
 			f.write(fmt)
 		f.write(print3opts.get('end', linesep))
 	elif args:
-		print(fmt % args)
+		print((fmt % args))
 	else:
 		print(fmt)
 
@@ -1177,7 +1177,7 @@ except NameError:  # missing
 	pass
 
 try:  # ignore basestring
-	_typedef_both(basestring, leng=None)
+	_typedef_both(str, leng=None)
 except NameError:  # missing
 	pass
 
@@ -1233,7 +1233,7 @@ except AttributeError:  # missing
 	pass
 
 try:  # if long exists, it is multi-precision ...
-	_typedef_both(long, item=_sizeof_Cdigit, leng=_len_int)
+	_typedef_both(int, item=_sizeof_Cdigit, leng=_len_int)
 	_typedef_both(int)  # ... and int is fixed size
 except NameError:  # no long, only multi-precision int in Python 3.0
 	_typedef_both(int,  item=_sizeof_Cdigit, leng=_len_int)
@@ -1287,7 +1287,7 @@ except AttributeError:  # missing
 	pass
 
 try:
-	_typedef_both(unicode, leng=_len_unicode, item=_sizeof_Cunicode)
+	_typedef_both(str, leng=_len_unicode, item=_sizeof_Cunicode)
 	_typedef_both(str,	 leng=_len,		 item=_sizeof_Cbyte)  # 1-byte char
 except NameError:  # str is unicode
 	_typedef_both(str,	 leng=_len_unicode, item=_sizeof_Cunicode)
@@ -1342,7 +1342,7 @@ try:  # reversed list and tuples iterators
 except NameError:  # missing
 	pass
 try:  # range iterator
-	s.append(xrange(1))
+	s.append(range(1))
 except NameError:  # missing
 	pass
 try:  # callable-iterator
@@ -2342,7 +2342,7 @@ if __name__ == '__main__':
 		_sizeof_Cdouble  = calcsize('d')  #PYCHOK OK
 		_sizeof_Csize_t  = calcsize('Z')  #PYCHOK OK
 		_sizeof_Cssize_t = calcsize('z')  #PYCHOK OK
-		t = [t for t in locals().items() if t[0].startswith('_sizeof_')]
+		t = [t for t in list(locals().items()) if t[0].startswith('_sizeof_')]
 		_printf('%s%d C sizes: (bytes) ... -C', linesep, len(t))
 		for n, v in _sorted(t):
 			_printf(' sizeof(%s): %r', n[len('_sizeof_'):], v)
@@ -2417,8 +2417,8 @@ if __name__ == '__main__':
 
 	if _opts('-int', '-long'):  # int and long examples
 		try:
-			_L5d  = long(1) << 64
-			_L17d = long(1) << 256
+			_L5d  = int(1) << 64
+			_L17d = int(1) << 256
 			t = '<int>/<long>'
 		except NameError:
 			_L5d  = 1 << 64
@@ -2510,7 +2510,7 @@ if __name__ == '__main__':
 
 	if _opts('-sys'):  # sys.modules examples
 		_printf('%sasizeof(limit=%s, code=%s, *%s) ... %s', linesep, 'MAX', False, 'sys.modules.values()', '-sys')
-		asizeof(limit=MAX, code=False, stats=1, *sys.modules.values())
+		asizeof(limit=MAX, code=False, stats=1, *list(sys.modules.values()))
 		_print_functions(sys.modules, 'sys.modules', opt='-sys')
 
 	if _opts('-type', '-types', '-typedefs'):  # show all basic _typedefs

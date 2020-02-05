@@ -201,59 +201,59 @@ class MainFrame(wx.Frame):
         # end wxGlade
 
     def startPageEntered(self, event): # wxGlade: MainFrame.<event_handler>
-        print "Event handler `startPageEntered' not implemented!"
+        print("Event handler `startPageEntered' not implemented!")
         event.Skip()
 
     def selectDirPressed(self, event): # wxGlade: MainFrame.<event_handler>
-        print "Event handler `selectDirPressed' not implemented!"
+        print("Event handler `selectDirPressed' not implemented!")
         event.Skip()
 
     def startDirProcessing(self, event): # wxGlade: MainFrame.<event_handler>
-        print "Event handler `startDirProcessing' not implemented!"
+        print("Event handler `startDirProcessing' not implemented!")
         event.Skip()
 
     def thresholdSliderAdjusted(self, event): # wxGlade: MainFrame.<event_handler>
-        print "Event handler `thresholdSliderAdjusted' not implemented!"
+        print("Event handler `thresholdSliderAdjusted' not implemented!")
         event.Skip()
 
     def checkItemsWithThreshold(self, event): # wxGlade: MainFrame.<event_handler>
-        print "Event handler `checkItemsWithThreshold' not implemented!"
+        print("Event handler `checkItemsWithThreshold' not implemented!")
         event.Skip()
 
     def expandTree(self, event): # wxGlade: MainFrame.<event_handler>
-        print "Event handler `expandTree' not implemented!"
+        print("Event handler `expandTree' not implemented!")
         event.Skip()
 
     def checkAllTreeItems(self, event): # wxGlade: MainFrame.<event_handler>
-        print "Event handler `checkAllTreeItems' not implemented!"
+        print("Event handler `checkAllTreeItems' not implemented!")
         event.Skip()
 
     def uncheckAllTreeItems(self, event): # wxGlade: MainFrame.<event_handler>
-        print "Event handler `uncheckAllTreeItems' not implemented!"
+        print("Event handler `uncheckAllTreeItems' not implemented!")
         event.Skip()
 
     def moveSelectedItemsIntoNewFolders(self, event): # wxGlade: MainFrame.<event_handler>
-        print "Event handler `moveSelectedItemsIntoNewFolders' not implemented!"
+        print("Event handler `moveSelectedItemsIntoNewFolders' not implemented!")
         event.Skip()
 
     def checkPreprocessingRE(self, event): # wxGlade: MainFrame.<event_handler>
-        print "Event handler `checkPreprocessingRE' not implemented!"
+        print("Event handler `checkPreprocessingRE' not implemented!")
         event.Skip()
 
     def updateCheckboxesConfigEvt(self, event): # wxGlade: MainFrame.<event_handler>
-        print "Event handler `updateCheckboxesConfigEvt' not implemented!"
+        print("Event handler `updateCheckboxesConfigEvt' not implemented!")
         event.Skip()
 
     def wordLengthWeightingAdjusted(self, event): # wxGlade: MainFrame.<event_handler>
-        print "Event handler `wordLengthWeightingAdjusted' not implemented!"
+        print("Event handler `wordLengthWeightingAdjusted' not implemented!")
         event.Skip()
 
     def strLenDifferenceAdjusted(self, event): # wxGlade: MainFrame.<event_handler>
-        print "Event handler `strLenDifferenceAdjusted' not implemented!"
+        print("Event handler `strLenDifferenceAdjusted' not implemented!")
         event.Skip()
 
     def wordLenDifferenceWeightingAdjusted(self, event): # wxGlade: MainFrame.<event_handler>
-        print "Event handler `wordLenDifferenceWeightingAdjusted' not implemented!"
+        print("Event handler `wordLenDifferenceWeightingAdjusted' not implemented!")
         event.Skip()
 
 # end of class MainFrame

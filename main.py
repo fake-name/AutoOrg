@@ -10,7 +10,7 @@ import wx
 from MainFrame import MainFrame
 
 if __name__ == "__main__":
-	pyFOrg = wx.PySimpleApp(0)
+	pyFOrg = wx.App(0)
 	wx.InitAllImageHandlers()
 	mainFrame = MainFrame(None, -1, "")
 	pyFOrg.SetTopWindow(mainFrame)

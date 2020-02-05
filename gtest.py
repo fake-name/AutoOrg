@@ -54,7 +54,7 @@ if __name__ == '__main__':
 	fp=open(file,"r")
 
 	mbox = mailbox.UnixMailbox(fp, msgfactory) # parse unix mailbox
-	print mbox
+	print(mbox)
 	G = nx.DiGraph() # create empty graph
 
 	# parse each messages and build graph
@@ -73,7 +73,7 @@ if __name__ == '__main__':
 
 	# print edges with message subject
 	for (u,v,d) in G.edges_iter(data=True):
-		print "From: %s To: %s Subject: %s"%(u,v,d['message']["Subject"])
+		print("From: %s To: %s Subject: %s"%(u,v,d['message']["Subject"]))
 
 
 	try: # draw

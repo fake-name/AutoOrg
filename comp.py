@@ -24,11 +24,11 @@ except:
 def compStr(strA, strB):
 	sLAt = strA.split(" ")
 	sLBt = strB.split(" ")
-	
+
 	lenSLAt = len(sLAt)
 	lenSLBt = len(sLBt)
-	
-	
+
+
 	if lenSLAt < lenSLBt:
 		sLA = sLAt
 		sLB = sLBt
@@ -43,9 +43,9 @@ def compStr(strA, strB):
 	#compConfDict - {"wordDifference" : 1.00, "wordLengthWeighting" : 1.00, "wordDifferenceWeighting" : 1.00}
 
 	totalSim = 0
-	
+
 	for x in range(lenSLA):				#The magic (or obsfucation, take your pick)
-		if (len(sLA[x]) > 1):
+		if len(sLA[x]) > 1:
 			wordSimilarity = 0
 			wordWeight = 0
 			for y in range(lenSLB):
@@ -63,11 +63,11 @@ def compStr(strA, strB):
 	#print sLA, sLB, strA, strB
 	divRatio = lenSLA if lenSLA > lenSLB else lenSLB
 	if divRatio == 0:
-		print totalSim, divRatio
+		print(totalSim, divRatio)
 		return 0
-	return(totalSim / divRatio)
+	return totalSim / divRatio
 
-class Filename:
+class Filename(object):
 
 	gid = None
 	sim = None
@@ -79,45 +79,52 @@ class Filename:
 		#print "PreClean", filename
 		tempCleaned = filename
 		if config.brackets:
-			tempCleaned = re.sub("\[.*?\]", " ", tempCleaned)
+			tempCleaned = re.sub(r"\[.*?\]", " ", tempCleaned)
 		if config.parentheses:
-			tempCleaned = re.sub("\(.*?\)", " ", tempCleaned)
+			tempCleaned = re.sub(r"\(.*?\)", " ", tempCleaned)
 		if config.curlyBraces:
-			tempCleaned = re.sub("\{.*?\}", " ", tempCleaned)
+			tempCleaned = re.sub(r"\{.*?\}", " ", tempCleaned)
 
 		#print "PostClean", tempCleaned
 		tempCleaned = re.sub("'", "", tempCleaned)
 		#remove punctuation cleanly (')apostrophes
 
-		tempCleaned = re.sub("\.rar|\.zip|\.cbr|\.cbz|\.7z|\.jpg|\.png", " ", tempCleaned, re.IGNORECASE)	#remove known file suffixes
-		tempCleaned = re.sub("([\[\]_\+0-9()=!,])", " ", tempCleaned)				#clean brackets, symbols, and numbers: Removed "-"
-		tempCleaned = re.sub("\W(ch|vol)[0-9]+?", " ", tempCleaned)				#Clean 'ch01' or similar
-		tempCleaned = re.sub("\W[vc][0-9]*?\W", " ", tempCleaned)				#Clean 'v01' and 'c01' or similar
-		tempCleaned = re.sub("\W[a-zA-z0-9]\W", " ", tempCleaned)				#Remove all single letters
-		
+		tempCleaned = re.sub(r"\.rar|\.zip|\.cbr|\.cbz|\.7z|\.jpg|\.png", " ", tempCleaned, re.IGNORECASE)	#remove known file suffixes
+		tempCleaned = re.sub(r"([\[\]_\+0-9()=!,])", " ", tempCleaned)				#clean brackets, symbols, and numbers: Removed "-"
+		tempCleaned = re.sub(r"\W(ch|vol)[0-9]+?", " ", tempCleaned)				#Clean 'ch01' or similar
+		tempCleaned = re.sub(r"\W[vc][0-9]*?\W", " ", tempCleaned)				#Clean 'v01' and 'c01' or similar
+		tempCleaned = re.sub(r"\W[a-zA-z0-9]\W", " ", tempCleaned)				#Remove all single letters
+
 		for term in config.stripTerms:
 			#print "Term ", term
 			tempRE = re.compile(term, re.IGNORECASE)
 			tempCleaned = tempRE.sub(" ", tempCleaned)
-		
-		tempCleaned = re.sub("\.", " ", tempCleaned).lower()					#Remove dots
-		tempCleaned = re.sub(" +", " ", tempCleaned).rstrip().lstrip()				#reduce all repeated spaces to one space
+
+		tempCleaned = re.sub(r"\.", " ", tempCleaned).lower()					#Remove dots
+		tempCleaned = re.sub(r" +", " ", tempCleaned).rstrip().lstrip()				#reduce all repeated spaces to one space
 
 		self.fn = filename
 		self.cn = tempCleaned
-		
-		
+
+
 	def __repr__(self):
 		return "'Filename Item for %s'\n	cleanedName = %s\n	simVal = %s\n	groupID = %s\n" % (self.fn, self.cn, self.sim, self.gid)
+
+	def __lt__(self, other):
+		return self.fn < other.fn
+
+	def __eq__(self, other):
+		return self.fn == other.fn
+
 
 	def comp(self, otherFile):
 		compValue = compStr(self.cn, otherFile.cn)
 		return compValue
 		#compConf.mapMatrice[otherFile.idNo, self.idNo] = compValue
-			
+
 
 	def purge(self, sMatrix, thresh = 1.3):
-		for key, value in self.pairs.items():
+		for key, value in list(self.pairs.items()):
 			if value < thresh:
 				del self.pairs[key]
 				#print "removed key", value, thresh
@@ -130,7 +137,7 @@ class Filename:
 	#def __repr__(self):
 	#	return (repr((self.fn, self.cn, self.pairs)))
 
-class ConfigObj:
+class ConfigObj(object):
 	compThreshold			=	1500
 
 	wordLengthWeighting		=	1000
@@ -138,7 +145,7 @@ class ConfigObj:
 	wordDifferenceWeighting		=	1000
 
 	stripTerms			=	[]
-	stripStr			=	"by twilight dreams scans:senfgurke:chapter:volume:season"
+	stripStr			=	""
 
 	brackets	=	True
 	parentheses	=	True
@@ -151,39 +158,38 @@ class ConfigObj:
 
 	def dump(self):
 		config = {}
-		config["compThreshold"] = self.compThreshold
+		config["compThreshold"]            = self.compThreshold
 
-		config["wordLengthWeighting"] = self.wordLengthWeighting
-		config["strLengthWeighting"] = self.strLengthWeighting
+		config["wordLengthWeighting"]      = self.wordLengthWeighting
+		config["strLengthWeighting"]       = self.strLengthWeighting
 		config["wordDifferenceWeighting	"] = self.wordDifferenceWeighting
 
-		config["stripTerms"] = self.stripTerms
-		config["stripStr"] = self.stripStr
+		config["stripTerms"]               = self.stripTerms
+		config["stripStr"]                 = self.stripStr
 
-		config["brackets"] = self.brackets
-		config["parentheses"] = self.parentheses
-		config["curlyBraces"] = self.curlyBraces
+		config["brackets"]                 = self.brackets
+		config["parentheses"]              = self.parentheses
+		config["curlyBraces"]              = self.curlyBraces
 
 		return config
-	
+
 	def load(self, config):
-		
-		self.compThreshold = config["compThreshold"]
 
-		self.wordLengthWeighting = config["wordLengthWeighting"]
+		self.compThreshold            = config["compThreshold"]
+		self.wordLengthWeighting      = config["wordLengthWeighting"]
 		self.strLengthWeightingconfig = config["strLengthWeighting"]
-		self.wordDifferenceWeighting = config["wordDifferenceWeighting	"]
+		self.wordDifferenceWeighting  = config["wordDifferenceWeighting	"]
 
-		self.stripTerms = config["stripTerms"]
-		self.stripStr = config["stripStr"]
+		self.stripTerms               = config["stripTerms"]
+		self.stripStr                 = config["stripStr"]
 
-		self.brackets = config["brackets"]
-		self.parentheses = config["parentheses"]
-		self.curlyBraces = config["curlyBraces"]
-		
+		self.brackets                 = config["brackets"]
+		self.parentheses              = config["parentheses"]
+		self.curlyBraces              = config["curlyBraces"]
+
 		return
 
-class oneMatrix:
+class oneMatrix(object):
 	#Matrix of simlarity values
 	#Setting array[fileIDNO1, fileIDNO2] = simVal adds item to array
 	#reading is accomplished by x = array[fileIDNO1, fileIDNO2]
@@ -193,30 +199,30 @@ class oneMatrix:
 	#Therefore The order which you pass items, both to read and write is not important
 
 	#It should store the minimum ammount of information to hold the entirety of all comparison items
-	
+
 	def __init__(self, matrixSz):
 		self.matrixSz = matrixSz
-		
+
 		if matrixSz > 5000:
-			print
+			print()
 			self.mmapped = True
 			self.tempF = tempfile.mkstemp()
 			self.f = h5py.File(self.tempF[1], 'w')
 
 			self.m = self.f.create_dataset('ds', (matrixSz,matrixSz), compression='gzip', compression_opts=4)
-			
-			print "Initializing Array Tempfile - \"%s\"" % self.tempF[1]
+
+			print("Initializing Array Tempfile - \"%s\"" % self.tempF[1])
 			if matrixSz > 5000:
-				print "This could take a while"
+				print("This could take a while")
 			#self.m[:] = -1		#Broadcast array to -1
-			print "Array Initialized"
+			print("Array Initialized")
 			#print self.m[:]
 			#print self.m.items()
 		else:
-			print "Using in-memory array"
+			print("Using in-memory array")
 			self.mmapped = False
 			self.m = np.zeros((matrixSz,matrixSz))
-		
+
 	def get(self, x, y):
 		if x <= y:
 			return self.m[x, y]
@@ -245,7 +251,8 @@ class oneMatrix:
 		yRang = self.m[key,...]
 		for value in range(self.matrixSz):
 			sim = xRang[value] if xRang[value] > yRang[key] else yRang[key]
-			if sim > thresh and value != key: out[value] = sim
+			if sim > thresh and value != key:
+				out[value] = sim
 			#print self.m[value,key], self.m[key,value], sim
 		return out
 
@@ -254,35 +261,32 @@ class oneMatrix:
 			try:
 				self.f.close()
 			except:
-				print "Could not close database file due to an unknown reason"
-				print "This error may be caused by excessive disk activity"
-				pass
+				print("Could not close database file due to an unknown reason")
+				print("This error may be caused by excessive disk activity")
 			try:
 				os.close(self.tempF[0])
 			except:
-				print "Could not close pipe"
-				print "This error may be caused by excessive disk activity"
-				pass
+				print("Could not close pipe")
+				print("This error may be caused by excessive disk activity")
 			try:
 				os.unlink(self.tempF[1])
 			except:
-				print "Could not delete temporary database file at - %s" % self.tempF[1], "due to an unknown error"
-				print "You may want to delete it manually"
-				print "This error may be caused by excessive disk activity"
-				pass
+				print("Could not delete temporary database file at - %s" % self.tempF[1], "due to an unknown error")
+				print("You may want to delete it manually")
+				print("This error may be caused by excessive disk activity")
 	def close(self):
 		self.__del__()
-		
 
-class Comparator:
+
+class Comparator(object):
 	def __init__(self, compConf = ConfigObj, printDebug=False):
 		self.compConf = compConf
 		self.debug = printDebug
 
 	def comp(self, targetDir):
 
-		
-		print "Getting File List..."
+
+		print("Getting File List...")
 
 		wx.GetApp().Yield()	#Yield execution to the GUI to allow printing
 
@@ -291,20 +295,20 @@ class Comparator:
 		if os.access(targetDir, os.W_OK):
 			dirCont = os.listdir(targetDir)
 		else:
-			print "cannot access Directory"
+			print("cannot access Directory")
 
 		#if self.debug:
 		#print "File List Size = %s" % asizeof(dirCont)
 		numFiles = len(dirCont)
 		#print dirCont
 		if numFiles == 0:
-			print "No files in target Directory!"
+			print("No files in target Directory!")
 			return
 
 		wx.GetApp().Yield()	#Yield execution to the GUI to allow printing
 		#Import list of file names, and push them into a dictionary
-		print "Number of Files = %s" % numFiles
-		print "Scrubbing File Names of Dirs"
+		print("Number of Files = %s" % numFiles)
+		print("Scrubbing File Names of Dirs")
 		count = 0
 		self.fileDict = {}
 		self.compConf.itemDict = {}
@@ -315,13 +319,13 @@ class Comparator:
 				self.compConf.itemDict[count] = file
 				self.fileDict[file.fn] = file
 				if count % 250 == 0:
-					print "File %s of %s" % (count, numFiles)
+					print("File %s of %s" % (count, numFiles))
 					wx.GetApp().Yield()	#Yield execution to the GUI to allow printing
 				count += 1
 
 		#print "File List Size = %s" % asizeof(files)
 		#raw_input("Press enter to continue")
-		print "Starting Comparison"
+		print("Starting Comparison")
 		files.sort()
 		#print files
 
@@ -334,15 +338,13 @@ class Comparator:
 
 		self.compConf.mapMatrice = oneMatrix(numFiles)
 		#print  self.fileDict
-		for targetKey, targetFile in self.fileDict.items():
-			
-
+		for targetKey, targetFile in list(self.fileDict.items()):
 			subArr = np.zeros((numFiles))
 
-			for compKey, compFile in self.fileDict.items():
+			for compKey, compFile in list(self.fileDict.items()):
 				if targetFile != compFile:
 					if not targetFile.idNo < compFile.idNo:
-						
+
 						subArr[compFile.idNo] = targetFile.comp(compFile)
 
 			self.compConf.mapMatrice.addRow(targetFile.idNo, subArr)
@@ -354,25 +356,28 @@ class Comparator:
 
 			#Print **more** for lots of files, because each step takes longer
 			#This makes progress more visible
-			if numFiles < 1000: modu = 25
-			elif numFiles < 5000: modu = 10
-			else: modu = 1
+			if numFiles < 1000:
+				modu = 25
+			elif numFiles < 5000:
+				modu = 10
+			else:
+				modu = 1
 
 			if loopctr % modu == 0:
-				print "Step:", loopctr,
-				print " - Remaning steps:", numFiles - loopctr
+				print("Step:", loopctr, end=' ')
+				print(" - Remaning steps:", numFiles - loopctr)
 				wx.GetApp().Yield()	#Yield execution to the GUI to allow printing
 
-		print "Done Comparison"
-		print "Operation required %s string comparisons" % (numFiles*(numFiles-1)/2)
+		print("Done Comparison")
+		print("Operation required %s string comparisons" % (numFiles*(numFiles-1)/2))
 		#print self.compConf.mapMatrice
-		
+
 		if self.debug:
-			for key, value in self.compConf.itemDict.items():
-				print key, value.fn, "comped to: "
-				for tkey, tvalue in self.compConf.itemDict.items():
+			for key, value in list(self.compConf.itemDict.items()):
+				print(key, value.fn, "comped to: ")
+				for tkey, tvalue in list(self.compConf.itemDict.items()):
 					if tkey != key:
-						print "	", tkey, tvalue.fn, tvalue.cn
+						print("	", tkey, tvalue.fn, tvalue.cn)
 				#for subkey, subval in value.pairs.items():
 				#	print "	", subkey.fn, subval
 
@@ -385,11 +390,11 @@ class Comparator:
 
 		inFileDict = {}
 
-		for key, value in self.fileDict.items():
+		for key, value in list(self.fileDict.items()):
 			#print "Item -----", value.fn, value.idNo
 			inFileDict[value.idNo] = value
 
-		
+
 
 		fileGroups = []
 		#print compThresh
@@ -397,8 +402,8 @@ class Comparator:
 		retList = False
 		if retList:
 			#For when/if I switch the comp engine over to an ObjectListView
-		
-			while len(inFileDict) > 0:
+
+			while inFileDict:
 				value = inFileDict.popitem()
 				#if self.debug:
 				#print value,
@@ -409,11 +414,11 @@ class Comparator:
 				#print inFileDict
 				gid = value[1].cn.rstrip().lstrip()
 
-				if len(sims)> 0:
+				if sims:
 
 					#print "sims", sims
 
-					for subkey, subval in sims.items():
+					for subkey, subval in list(sims.items()):
 						if subkey in inFileDict:
 							item = inFileDict[subkey]
 							item.sim = subval
@@ -426,7 +431,7 @@ class Comparator:
 					value[1].sim = "Original"
 					value[1].gid = gid
 					fileGroups.append(value[1])
-					print item.fn, "Has Items!"
+					print(item.fn, "Has Items!")
 
 
 
@@ -449,7 +454,7 @@ class Comparator:
 					tempDict = {}
 					#print "sims", sims
 
-					for subkey, subval in sims.items():
+					for subkey, subval in list(sims.items()):
 						if subkey in inFileDict:
 							item = inFileDict[subkey]
 							tempDict[item] = subval
@@ -459,8 +464,8 @@ class Comparator:
 								del inFileDict[subkey]
 					tempDict[value[1]] = "Original"
 
-					print len(inFileDict), "Files Remaining - ",
-					print "%s Has %s Items!" % (item.fn, len(tempDict))
+					print(len(inFileDict), "Files Remaining - ", end=' ')
+					print("%s Has %s Items!" % (item.fn, len(tempDict)))
 
 					if len(tempDict) > 1:
 						fileGroups.append(tempDict)
@@ -471,7 +476,7 @@ class Comparator:
 				#print "remaining Files - ", len(inFileDict)
 				#print value[1].fn, value[0]
 
-		
+
 		#print fileGroups
 		return fileGroups
 
@@ -483,7 +488,7 @@ class Test():
 	def __init__(self):
 		self.obj = Comparator()
 
-		
+
 	def go(self):
 		return self.obj.comp(r"N:\IRC")#\uns2")
 
@@ -497,9 +502,9 @@ from __main__ import *
 tester = Test()
 			"""
 			tmr = timeit.Timer("tester.go()", s)
-			print tmr
+			print(tmr)
 			execs = 3
-			print "%.10f sec/pass" % (tmr.timeit(number=execs) / execs)
+			print("%.10f sec/pass" % (tmr.timeit(number=execs) / execs))
 
 		if sys.argv[1] == "-p":
 			import cProfile
@@ -513,4 +518,3 @@ tester = Test()
 
 	sys.exit(0)
 
-	

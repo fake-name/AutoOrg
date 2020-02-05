@@ -24,30 +24,29 @@ def isText (buff, buffLen):
 
 def moveFiles(sourcePath):
 
-	isImgRE = re.compile("(\.jpg|\.jpeg|\.gif|\.png|\.tiff|\.bmp)$", re.IGNORECASE)
-	isHtmlRE = re.compile("(\.htm|\.html|\.php|\.js|.css)$", re.IGNORECASE)
-	alreadyNamed = re.compile("\d\d\d\d\d\d\d.*?$", re.IGNORECASE)
-	
-	print sourcePath
+	isImgRE      = re.compile(r"(\.jpg|\.jpeg|\.gif|\.png|\.tiff|\.bmp)$", re.IGNORECASE)
+	isHtmlRE     = re.compile(r"(\.htm|\.html|\.php|\.js|.css)$", re.IGNORECASE)
+	alreadyNamed = re.compile(r"\d\d\d\d\d\d\d.*?$", re.IGNORECASE)
+
+	print(sourcePath)
 	if os.access(sourcePath, os.W_OK):
 		wh = os.walk(sourcePath)
 		walkedFiles = 0
-		print "Walking"
+		print("Walking")
 		for root, dirs, files in wh:
 			#print root, dir#, files
-			print "Chug"
 			for file in files:
 
 				walkedFiles += 1
 				if walkedFiles % 100 == 0:
-					print "Walked %s files" % walkedFiles
-					
+					print("Walked %s files" % walkedFiles)
+
 				originPath =  os.path.join(root, file)
 
 				if isImgRE.search(file):
 					#print "It's an Image", originPath
 					fr = alreadyNamed.search(file)
-					print fr, file
+					print(fr, file)
 					if not fr:
 						try:
 							imPt = open(originPath, "rb")
@@ -57,8 +56,8 @@ def moveFiles(sourcePath):
 							pixes = im.size[0]*im.size[1]
 							imgName = "%06d - %s" % (pixes, file)
 							dstPath =  os.path.join(sourcePath, imgName)
-							print "renaming as - ", imgName
-							
+							print("renaming as - ", imgName)
+
 							os.rename(originPath, dstPath)
 
 						except:
@@ -69,21 +68,21 @@ def moveFiles(sourcePath):
 								pass
 							imgName = "%06d Broken- %s" % (0, file)
 							dstPath =  os.path.join(sourcePath, imgName)
-							print "renaming as - ", imgName
-					
+							print("renaming as - ", imgName)
+
 					#elif isHtmlRE.search(file):
 					#	print "HTML File: %s" % originPath
 					#	os.remove(originPath)
-					
+
 				else:# len(file) > 20:
-					
-					
-					
+
+
+
 					fsize = os.path.getsize(originPath)
 					if fsize < 100:
-						print "Tiny File - ", originPath
-						
-						print originPath
+						print("Tiny File - ", originPath)
+
+						print(originPath)
 						os.remove(originPath)
 					else:
 						pass
@@ -117,7 +116,7 @@ def moveFiles(sourcePath):
 						else:
 							print "Error?"
 
-						
+
 
 					elif fsize == 0:
 						print "Zero Byte File: ", file
@@ -129,13 +128,13 @@ def moveFiles(sourcePath):
 
 					#
 	else:
-		print "Invalid Directory!"
+		print("Invalid Directory!")
 
 if __name__ == "__main__":
-	print len(sys.argv)
+	print(len(sys.argv))
 	if len(sys.argv) > 1:
 		sourcePath = sys.argv[1]
 		moveFiles(sourcePath)
 	else:
-		print "Needs an arguement"
+		print("Needs an arguement")
 		sys.exit(0)
