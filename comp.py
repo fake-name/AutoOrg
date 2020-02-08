@@ -14,37 +14,34 @@ import wx
 
 import h5py
 
-try:
-	import psyco
-	psyco.full()
-except:
-	#No PsyCo, Can't do anything about that....
-	pass
 
 def compStr(strA, strB):
+	'''
+	Compare two strings. Do some fancy things to allow word transposition
+	in the strings, and handle one string being a substring of the other
+	intelligently.
+	'''
 	sLAt = strA.split(" ")
 	sLBt = strB.split(" ")
 
 	lenSLAt = len(sLAt)
 	lenSLBt = len(sLBt)
 
-
 	if lenSLAt < lenSLBt:
-		sLA = sLAt
-		sLB = sLBt
+		sLA    = sLAt
+		sLB    = sLBt
 		lenSLA = lenSLAt
 		lenSLB = lenSLBt
 	else:
-		sLA = sLBt
-		sLB = sLAt
+		sLA    = sLBt
+		sLB    = sLAt
 		lenSLA = lenSLBt
 		lenSLB = lenSLAt
 
-	#compConfDict - {"wordDifference" : 1.00, "wordLengthWeighting" : 1.00, "wordDifferenceWeighting" : 1.00}
-
 	totalSim = 0
 
-	for x in range(lenSLA):				#The magic (or obsfucation, take your pick)
+	# The magic (or obsfucation, take your pick)
+	for x in range(lenSLA):
 		if len(sLA[x]) > 1:
 			wordSimilarity = 0
 			wordWeight = 0
@@ -56,25 +53,26 @@ def compStr(strA, strB):
 						lenY = len(sLB[y])
 						wordWeight = float(lenX if lenX < lenY else lenY)
 						wordWeight = wordWeight - abs(lenX - lenY)
-						#pprint([sLA, sLB, sLA[x], sLB[y], wordSimilarity, wordWeight])
 			if wordWeight > 0:
 				totalSim += wordSimilarity * math.sqrt(wordWeight)
 
-	#print sLA, sLB, strA, strB
 	divRatio = lenSLA if lenSLA > lenSLB else lenSLB
 	if divRatio == 0:
-		print(totalSim, divRatio)
+		# print(totalSim, divRatio)
 		return 0
 	return totalSim / divRatio
 
-class Filename(object):
+
+class Filename():
 
 	gid = None
-	sim = None
 
-	def __init__(self, filename, config, idNo):
+	def __init__(self, filename, config, id_num):
 
-		self.idNo = idNo
+		print("Comparing:", filename)
+		self.similarity_cache = None
+
+		self.__id_no = id_num
 
 		#print "PreClean", filename
 		tempCleaned = filename
@@ -95,8 +93,7 @@ class Filename(object):
 		tempCleaned = re.sub(r"\W[vc][0-9]*?\W", " ", tempCleaned)				#Clean 'v01' and 'c01' or similar
 		tempCleaned = re.sub(r"\W[a-zA-z0-9]\W", " ", tempCleaned)				#Remove all single letters
 
-		for term in config.stripTerms:
-			#print "Term ", term
+		for term in [t for t in config.stripTerms if t]:
 			tempRE = re.compile(term, re.IGNORECASE)
 			tempCleaned = tempRE.sub(" ", tempCleaned)
 
@@ -106,9 +103,12 @@ class Filename(object):
 		self.fn = filename
 		self.cn = tempCleaned
 
+	@property
+	def id_num(self):
+		return self.__id_no
 
 	def __repr__(self):
-		return "'Filename Item for %s'\n	cleanedName = %s\n	simVal = %s\n	groupID = %s\n" % (self.fn, self.cn, self.sim, self.gid)
+		return "<Filename id: %s, '%s:%s'>" % (self.__id_no, self.fn, self.cn)
 
 	def __lt__(self, other):
 		return self.fn < other.fn
@@ -116,11 +116,14 @@ class Filename(object):
 	def __eq__(self, other):
 		return self.fn == other.fn
 
+	def __hash__(self):
+		return self.__id_no
+
 
 	def comp(self, otherFile):
 		compValue = compStr(self.cn, otherFile.cn)
 		return compValue
-		#compConf.mapMatrice[otherFile.idNo, self.idNo] = compValue
+		#compConf.mapMatrice[otherFile.id_num, self.id_num] = compValue
 
 
 	def purge(self, sMatrix, thresh = 1.3):
@@ -138,26 +141,28 @@ class Filename(object):
 	#	return (repr((self.fn, self.cn, self.pairs)))
 
 class ConfigObj(object):
-	compThreshold			=	1500
+	compThreshold           = 1500
 
-	wordLengthWeighting		=	1000
-	strLengthWeighting		=	1000
-	wordDifferenceWeighting		=	1000
+	wordLengthWeighting     = 1000
+	strLengthWeighting      = 1000
+	wordDifferenceWeighting = 1000
 
-	stripTerms			=	[]
-	stripStr			=	""
+	stripTerms              = []
+	stripStr                = ""
 
-	brackets	=	True
-	parentheses	=	True
-	curlyBraces	=	True
+	brackets                = True
+	parentheses             = True
+	curlyBraces             = True
 
-	mappingDict	=	{}
+	mappingDict             = {}
+	target_dir              = "~/"
 
 	def getCompThresh(self):
 		return float(self.compThreshold)/1000
 
 	def dump(self):
 		config = {}
+		config["target_dir"]               = self.target_dir
 		config["compThreshold"]            = self.compThreshold
 
 		config["wordLengthWeighting"]      = self.wordLengthWeighting
@@ -175,6 +180,7 @@ class ConfigObj(object):
 
 	def load(self, config):
 
+		self.target_dir               = config["target_dir"]
 		self.compThreshold            = config["compThreshold"]
 		self.wordLengthWeighting      = config["wordLengthWeighting"]
 		self.strLengthWeightingconfig = config["strLengthWeighting"]
@@ -189,16 +195,14 @@ class ConfigObj(object):
 
 		return
 
-class oneMatrix(object):
-	#Matrix of simlarity values
-	#Setting array[fileIDNO1, fileIDNO2] = simVal adds item to array
-	#reading is accomplished by x = array[fileIDNO1, fileIDNO2]
-	#since the similarity between two items is commutative ( array[fileIDNO1, fileIDNO2] ==  array[fileIDNO2, fileIDNO1] ),
-	#if we always sort the arguments passed through __getattr__ so the larger one is first, reduncancy should be eliminated
-
-	#Therefore The order which you pass items, both to read and write is not important
-
-	#It should store the minimum ammount of information to hold the entirety of all comparison items
+class ComutativeMatrix(object):
+	# Matrix of simlarity values
+	# Setting array[fileid_num1, fileid_num2] = simVal adds item to array
+	# reading is accomplished by x = array[fileid_num1, fileid_num2]
+	# since the similarity between two items is commutative ( array[fileid_num1, fileid_num2] ==  array[fileid_num2, fileid_num1] ),
+	# if we always sort the arguments passed through __getattr__ so the larger one is first, reduncancy should be eliminated
+	# Therefore The order which you pass items, both to read and write is not important
+	# It should store the minimum ammount of information to hold the entirety of all comparison items
 
 	def __init__(self, matrixSz):
 		self.matrixSz = matrixSz
@@ -241,7 +245,7 @@ class oneMatrix(object):
 		else:
 			self.m[key[1], key[0]] = value
 
-	def addRow(self, index, rowDat):
+	def set_row(self, index, rowDat):
 		self.m[index,...] = rowDat
 
 	def retItems(self, key, thresh):
@@ -249,245 +253,154 @@ class oneMatrix(object):
 		out = {}
 		xRang = self.m[...,key]
 		yRang = self.m[key,...]
-		for value in range(self.matrixSz):
-			sim = xRang[value] if xRang[value] > yRang[key] else yRang[key]
-			if sim > thresh and value != key:
-				out[value] = sim
-			#print self.m[value,key], self.m[key,value], sim
+		for idx in range(self.matrixSz):
+			sim = xRang[idx] if xRang[idx] > yRang[key] else yRang[key]
+			if sim > thresh and idx != key:
+				out[idx] = sim
 		return out
 
 	def __del__(self):
 		if self.mmapped:
 			try:
 				self.f.close()
-			except:
+			except Exception:
 				print("Could not close database file due to an unknown reason")
-				print("This error may be caused by excessive disk activity")
+
 			try:
 				os.close(self.tempF[0])
-			except:
+			except Exception:
 				print("Could not close pipe")
-				print("This error may be caused by excessive disk activity")
+
 			try:
 				os.unlink(self.tempF[1])
-			except:
+			except Exception:
 				print("Could not delete temporary database file at - %s" % self.tempF[1], "due to an unknown error")
 				print("You may want to delete it manually")
-				print("This error may be caused by excessive disk activity")
+
 	def close(self):
 		self.__del__()
 
 
-class Comparator(object):
-	def __init__(self, compConf = ConfigObj, printDebug=False):
+class Comparator():
+	def __init__(self, compConf = ConfigObj):
+
+		self.file_set = set()
+		self.mapMatrice = None
+
 		self.compConf = compConf
-		self.debug = printDebug
+
+	def load_files(self, target_dir):
+		# print("Getting File List...")
+
+		dirCont = []
+		if not os.access(target_dir, os.W_OK):
+			print("cannot access Directory")
+			return 0
+
+		dirCont = os.listdir(target_dir)
+
+		if not dirCont:
+			print("No files in target Directory!")
+			return 0
+
+		#Import list of file names, and push them into a dictionary
+		# print("Number of Files = %s" % len(dirCont))
+		# print("Scrubbing File Names of Dirs")
+		file_id = 0
+		self.file_set = set()
+		for item in dirCont:
+			if os.path.isfile(os.path.join(target_dir, item)):
+				file = Filename(
+						filename = item,
+						config   = self.compConf,
+						id_num   = file_id,
+					)
+				self.file_set.add(file)
+				if file_id % 250 == 0:
+					print("File %s of %s" % (file_id, len(dirCont)))
+				file_id += 1
+
+		return len(self.file_set)
 
 	def comp(self, targetDir):
 
-
-		print("Getting File List...")
-
-		wx.GetApp().Yield()	#Yield execution to the GUI to allow printing
-
-		files = []
-		dirCont = []
-		if os.access(targetDir, os.W_OK):
-			dirCont = os.listdir(targetDir)
-		else:
-			print("cannot access Directory")
-
-		#if self.debug:
-		#print "File List Size = %s" % asizeof(dirCont)
-		numFiles = len(dirCont)
-		#print dirCont
-		if numFiles == 0:
-			print("No files in target Directory!")
+		num_files = self.load_files(targetDir)
+		if not num_files:
 			return
 
-		wx.GetApp().Yield()	#Yield execution to the GUI to allow printing
-		#Import list of file names, and push them into a dictionary
-		print("Number of Files = %s" % numFiles)
-		print("Scrubbing File Names of Dirs")
-		count = 0
-		self.fileDict = {}
-		self.compConf.itemDict = {}
-		for item in dirCont:
-			if os.path.isfile(os.path.join(targetDir, item)):
-				file = Filename(item, self.compConf, count)
-				files.append(file)
-				self.compConf.itemDict[count] = file
-				self.fileDict[file.fn] = file
-				if count % 250 == 0:
-					print("File %s of %s" % (count, numFiles))
-					wx.GetApp().Yield()	#Yield execution to the GUI to allow printing
-				count += 1
+		self.mapMatrice = ComutativeMatrix(num_files)
+		for idx, targetFile in enumerate(self.file_set):
 
-		#print "File List Size = %s" % asizeof(files)
-		#raw_input("Press enter to continue")
-		print("Starting Comparison")
-		files.sort()
-		#print files
-
-
-		#print self.fileDict
-		loopctr = 0
-
-		#print "%s" % spCl
-
-
-		self.compConf.mapMatrice = oneMatrix(numFiles)
-		#print  self.fileDict
-		for targetKey, targetFile in list(self.fileDict.items()):
-			subArr = np.zeros((numFiles))
-
-			for compKey, compFile in list(self.fileDict.items()):
-				if targetFile != compFile:
-					if not targetFile.idNo < compFile.idNo:
-
-						subArr[compFile.idNo] = targetFile.comp(compFile)
-
-			self.compConf.mapMatrice.addRow(targetFile.idNo, subArr)
-
-			loopctr += 1
-			#print "Size = %s" % asizeof(targetFile),
-			#print " Len of pairs = %s" % len(targetFile.pairs)
-			#if self.debug:
+			for compFile in self.file_set:
+				if (
+						targetFile != compFile
+					and
+						targetFile.id_num >= compFile.id_num
+					):
+					self.mapMatrice[compFile.id_num, targetFile.id_num] = targetFile.comp(compFile)
 
 			#Print **more** for lots of files, because each step takes longer
 			#This makes progress more visible
-			if numFiles < 1000:
+			if num_files < 1000:
 				modu = 25
-			elif numFiles < 5000:
+			elif num_files < 5000:
 				modu = 10
 			else:
 				modu = 1
 
-			if loopctr % modu == 0:
-				print("Step:", loopctr, end=' ')
-				print(" - Remaning steps:", numFiles - loopctr)
-				wx.GetApp().Yield()	#Yield execution to the GUI to allow printing
+			if idx % modu == 0:
+				print("Step:", idx, end=' ')
+				print(" - Remaning steps:", num_files - idx)
 
-		print("Done Comparison")
-		print("Operation required %s string comparisons" % (numFiles*(numFiles-1)/2))
-		#print self.compConf.mapMatrice
+		#print self.mapMatrice
 
-		if self.debug:
-			for key, value in list(self.compConf.itemDict.items()):
-				print(key, value.fn, "comped to: ")
-				for tkey, tvalue in list(self.compConf.itemDict.items()):
-					if tkey != key:
-						print("	", tkey, tvalue.fn, tvalue.cn)
-				#for subkey, subval in value.pairs.items():
-				#	print "	", subkey.fn, subval
-
-		#mx = self.compConf.mapMatrice.m
+		#mx = self.mapMatrice.m
 		#print mx[:]
 
 	def trimTree(self, compThresh = 1.5):
 
 		compThresh = float(compThresh)
 
-		inFileDict = {}
+		item_id_dict = {}
 
-		for key, value in list(self.fileDict.items()):
-			#print "Item -----", value.fn, value.idNo
-			inFileDict[value.idNo] = value
+		for value in self.file_set:
+			item_id_dict[value.id_num] = value
 
-
+		# import pdb
+		# pdb.set_trace()
 
 		fileGroups = []
-		#print compThresh
-		#print inFileDict
-		retList = False
-		if retList:
-			#For when/if I switch the comp engine over to an ObjectListView
 
-			while inFileDict:
-				value = inFileDict.popitem()
-				#if self.debug:
-				#print value,
-				#print value[1].fn
-				sims = self.compConf.mapMatrice.retItems(value[0], compThresh)
-				#print value
-				#print sims
-				#print inFileDict
-				gid = value[1].cn.rstrip().lstrip()
+		while item_id_dict:
+			key, value = item_id_dict.popitem()
 
-				if sims:
-
-					#print "sims", sims
-
-					for subkey, subval in list(sims.items()):
-						if subkey in inFileDict:
-							item = inFileDict[subkey]
-							item.sim = subval
-							item.gid = gid
-							fileGroups.append(item)
-							#print subkey
-							if subkey in inFileDict:
-								#print "Deling ", subkey
-								del inFileDict[subkey]
-					value[1].sim = "Original"
-					value[1].gid = gid
-					fileGroups.append(value[1])
-					print(item.fn, "Has Items!")
-
-
-
-						#print "appended"
-
-				#print "remaining Files - ", len(inFileDict)
-				#print value[1].fn, value[0]
-
-		else:
-			while len(inFileDict) > 0:
-				value = inFileDict.popitem()
-				#if self.debug:
-				#print value,
-				#print value[1].fn
-				sims = self.compConf.mapMatrice.retItems(value[0], compThresh)
-				#print value
-				#print sims
-				#print inFileDict
-				if len(sims)> 0:
-					tempDict = {}
-					#print "sims", sims
-
-					for subkey, subval in list(sims.items()):
-						if subkey in inFileDict:
-							item = inFileDict[subkey]
+			sims = self.mapMatrice.retItems(key, compThresh)
+			if sims:
+				tempDict = {}
+				for subkey, subval in list(sims.items()):
+					for other_key, other in list(item_id_dict.items()):
+						if subkey == other.id_num:
+							item = item_id_dict[subkey]
 							tempDict[item] = subval
-							#print subkey
-							if subkey in inFileDict:
-								#print "Deling ", subkey
-								del inFileDict[subkey]
-					tempDict[value[1]] = "Original"
+							if subkey in item_id_dict:
+								del item_id_dict[subkey]
 
-					print(len(inFileDict), "Files Remaining - ", end=' ')
-					print("%s Has %s Items!" % (item.fn, len(tempDict)))
+				tempDict[value] = "Original"
 
-					if len(tempDict) > 1:
-						fileGroups.append(tempDict)
+				if len(tempDict) > 1:
+					fileGroups.append(tempDict)
 
-					wx.GetApp().Yield()	#Yield execution to the GUI to allow printing
-						#print "appended"
+				# raise RuntimeError
 
-				#print "remaining Files - ", len(inFileDict)
-				#print value[1].fn, value[0]
-
-
-		#print fileGroups
 		return fileGroups
 
 	def close(self):
 		#gc seems to fail to catch the exit, resulting in lots of temp files everywhere
-		self.compConf.mapMatrice.close()
+		self.mapMatrice.close()
 
 class Test():
 	def __init__(self):
 		self.obj = Comparator()
-
 
 	def go(self):
 		return self.obj.comp(r"N:\IRC")#\uns2")
