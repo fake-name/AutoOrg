@@ -20,21 +20,23 @@ import h5py
 	#	return (repr((self.fn, self.cn, self.pairs)))
 
 class ConfigObj(object):
-	compThreshold           = 1500
+	def __init__(self):
+		self.compThreshold           = 1500
 
-	wordLengthWeighting     = 1000
-	strLengthWeighting      = 1000
-	wordDifferenceWeighting = 1000
+		self.wordLengthWeighting     = 1000
+		self.strLengthWeighting      = 1000
+		self.wordDifferenceWeighting = 1000
 
-	stripTerms              = []
-	stripStr                = ""
+		self.stripTerms              = []
+		self.stripStr                = ""
 
-	brackets                = True
-	parentheses             = True
-	curlyBraces             = True
+		self.brackets                = True
+		self.parentheses             = True
+		self.curlyBraces             = True
 
-	mappingDict             = {}
-	target_dir              = "~/"
+		self.mappingDict             = {}
+		self.target_dir              = "~/"
+
 
 	def getCompThresh(self):
 		return float(self.compThreshold)/1000
