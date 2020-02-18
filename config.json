@@ -1,0 +1,14 @@
+{
+    "target_dir": "N:\\LightNovels\\0 - Novels",
+    "compThreshold": 1457,
+    "wordLengthWeighting": 1000.0,
+    "strLengthWeighting": 1000.0,
+    "wordDifferenceWeighting\t": 1000.0,
+    "stripTerms": [
+        ""
+    ],
+    "stripStr": "",
+    "brackets": true,
+    "parentheses": true,
+    "curlyBraces": true
+}

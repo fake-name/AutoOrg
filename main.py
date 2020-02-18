@@ -7,7 +7,7 @@
 
 
 import wx
-from MainFrame import MainFrame
+from PyFOrg.gui import MainFrame
 
 if __name__ == "__main__":
 	pyFOrg = wx.App(0)

@@ -15,7 +15,8 @@ import shutil
 import wx
 import wx.lib.agw.customtreectrl as ctc
 
-import comp
+from . import file_comparator
+from . import config
 
 
 # begin wxGlade: dependencies
@@ -59,7 +60,7 @@ class MainFrame(wx.Frame):
 
 
 	def __init__(self, *args, **kwds):
-		self.config = comp.ConfigObj()
+		self.config = config.ConfigObj()
 		try:
 			with open("config.json", "r") as fp:
 				self.config.load(json.load(fp))
@@ -115,7 +116,7 @@ class MainFrame(wx.Frame):
 		except:
 			print("Configuration File Corrupted")
 			print("Defaulting to default settings")
-			self.config                                      = comp.ConfigObj
+			self.config                                      = config.ConfigObj
 			self.filenameCleanerTextCtrl                     = wx.TextCtrl(self.notebookConfigPane, -1, "")
 
 
@@ -350,7 +351,7 @@ class MainFrame(wx.Frame):
 
 		if os.access(self.fileSourceDir, os.F_OK):
 			print("Path OK")
-			self.compar = comp.Comparator(self.config)
+			self.compar = file_comparator.Comparator(self.config)
 			self.compar.comp(self.fileSourceDir)
 
 			self.trimmedDict = self.compar.trimTree(self.config.getCompThresh())
