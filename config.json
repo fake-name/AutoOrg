@@ -1,13 +1,19 @@
 {
-    "target_dir": "C:\\Users\\durr\\Documents\\Bubble_Bunnies",
-    "compThreshold": 2451,
+    "target_dir": "N:\\LightNovels\\Various Files",
+    "compThreshold": 1269,
     "wordLengthWeighting": 1000.0,
     "strLengthWeighting": 1000.0,
     "wordDifferenceWeighting\t": 1000.0,
     "stripTerms": [
-        ""
+        "- ln epub",
+        "- ln premium",
+        "epub",
+        "Ln Premium",
+        "Premium",
+        "- ln",
+        "vol"
     ],
-    "stripStr": "",
+    "stripStr": "- ln epub:- ln premium:epub:Ln Premium:Premium:- ln:vol",
     "brackets": true,
     "parentheses": true,
     "curlyBraces": true
