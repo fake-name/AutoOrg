@@ -84,7 +84,7 @@ class MainFrame(wx.Frame):
 
 		self.__create_config_pane(self.notebookConfigPane)
 
-		self.StatusText                                      = wx.StaticText(self, -1, "Status:")
+		# self.StatusText                                      = wx.StaticText(self, -1, "Status:")
 
 
 		self.__doLayout()
@@ -118,9 +118,6 @@ class MainFrame(wx.Frame):
 		self.strLenDifferenceAdjusted(None)
 		self.wordLenDifferenceWeightingAdjusted(None)
 		self.Refresh()
-
-	def __create_file_tree_pane(self, parent):
-		return fileTree
 
 	def __create_config_pane(self, parent):
 		self.configTabFilenameCleaningLabel                  = wx.StaticText(parent, -1, "Pre-Comparison Filename Processing")
@@ -177,12 +174,12 @@ class MainFrame(wx.Frame):
 		uncheckAllItemsButton                           = wx.Button(parent, -1, "Uncheck All")
 
 		sizerControlItemsButtons = wx.GridSizer(2, 3, 0, 0)
-		sizerControlItemsButtons.Add(expandAllTreeBranchesButton,   0, wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL, 0)
-		sizerControlItemsButtons.Add(expandCheckedItemsButton,      0, wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL, 0)
-		sizerControlItemsButtons.Add(checkAllItemsButton,           0, wx.EXPAND,                                                         0)
-		sizerControlItemsButtons.Add(collapseAllTreeBranchesButton, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL, 0)
-		sizerControlItemsButtons.Add(collapseCheckedItemsButton,    0, wx.EXPAND,                                                         0)
-		sizerControlItemsButtons.Add(uncheckAllItemsButton,         0, wx.EXPAND,                                                         0)
+		sizerControlItemsButtons.Add(expandAllTreeBranchesButton,   0, wx.EXPAND, 0)
+		sizerControlItemsButtons.Add(expandCheckedItemsButton,      0, wx.EXPAND, 0)
+		sizerControlItemsButtons.Add(checkAllItemsButton,           0, wx.EXPAND, 0)
+		sizerControlItemsButtons.Add(collapseAllTreeBranchesButton, 0, wx.EXPAND, 0)
+		sizerControlItemsButtons.Add(collapseCheckedItemsButton,    0, wx.EXPAND, 0)
+		sizerControlItemsButtons.Add(uncheckAllItemsButton,         0, wx.EXPAND, 0)
 
 		self.Bind(wx.EVT_BUTTON, self.expandTree,               expandAllTreeBranchesButton)
 		self.Bind(wx.EVT_BUTTON, self.expandCheckedTreeItems,   expandCheckedItemsButton)
@@ -206,11 +203,11 @@ class MainFrame(wx.Frame):
 		filler_panel_2.SetMinSize((20,50))
 
 		filePaneOperationsSizer = wx.BoxSizer(wx.HORIZONTAL)
-		filePaneOperationsSizer.Add(filePaneFileOpsLabel1, 0, wx.LEFT|wx.TOP|wx.BOTTOM|wx.ALIGN_CENTER_VERTICAL, 5)
+		filePaneOperationsSizer.Add(filePaneFileOpsLabel1,         0, wx.LEFT|wx.TOP|wx.BOTTOM|wx.ALIGN_CENTER_VERTICAL, 5)
 		filePaneOperationsSizer.Add(self.sliderNumFileforChecking, 0, 0, 0)
-		filePaneOperationsSizer.Add(filePaneFileOpsLabel2, 0, wx.RIGHT|wx.TOP|wx.BOTTOM|wx.ALIGN_CENTER_VERTICAL, 5)
-		filePaneOperationsSizer.Add(buttonCheckItems, 0, wx.ALIGN_CENTER_VERTICAL, 0)
-		filePaneOperationsSizer.Add(filler_panel_1, 0, 0, 0)
+		filePaneOperationsSizer.Add(filePaneFileOpsLabel2,         0, wx.RIGHT|wx.TOP|wx.BOTTOM|wx.ALIGN_CENTER_VERTICAL, 5)
+		filePaneOperationsSizer.Add(buttonCheckItems,              0, wx.ALIGN_CENTER_VERTICAL, 0)
+		filePaneOperationsSizer.Add(filler_panel_1,                0, 0, 0)
 		filePaneOperationsSizer.Add(self.__create_control_items_buttons(parent), 0, wx.EXPAND, 0)
 		filePaneOperationsSizer.Add(filler_panel_2, 1, wx.EXPAND, 0)
 		filePaneOperationsSizer.Add(buttonMoveFiles, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
@@ -224,25 +221,55 @@ class MainFrame(wx.Frame):
 		targetDirectoryLabel                            = wx.StaticText(parent, -1, "Directory to Process:")
 		self.startAddress                               = wx.TextCtrl(parent, -1, self.config.target_dir)
 		selectDirButton                                 = wx.Button(parent, -1, "Select Directory")
-		titleStaticLine                                 = wx.StaticLine(parent, -1, style=wx.LI_VERTICAL)
 		startProcButton                                 = wx.Button(parent, -1, "Start")
 
 
-		titleSizer = wx.BoxSizer(wx.VERTICAL)
-		titleSizer.Add(targetDirectoryLabel, 0, wx.ALL, 5)
+		sort_to_dir_label                                = wx.StaticText(parent, -1, "Sort into directory:")
+		self.sort_into_dir                              = wx.TextCtrl(parent, -1, self.config.sort_to_dir)
+		self.select_sort_into_dir_button                = wx.Button(parent, -1, "Select Directory")
+		self.enable_disable_sort_to                     = wx.ToggleButton(parent, -1, "Enable")
 
-		dirTextBoxSizer = wx.BoxSizer(wx.HORIZONTAL)
-		dirTextBoxSizer.Add(self.startAddress, 1, wx.EXPAND, 0)
-		dirTextBoxSizer.Add(selectDirButton, 0, wx.LEFT, 5)
-		dirTextBoxSizer.Add(titleStaticLine, 0, wx.LEFT|wx.RIGHT|wx.EXPAND, 5)
-		dirTextBoxSizer.Add(startProcButton, 0, 0, 0)
 
-		titleSizer.Add(dirTextBoxSizer, 1, wx.EXPAND, 0)
+		titleSizer = wx.FlexGridSizer(5)
+		titleSizer.SetFlexibleDirection(wx.HORIZONTAL)
+		titleSizer.AddGrowableCol(1)
 
-		self.Bind(wx.EVT_BUTTON, self.selectDirPressed,        selectDirButton)
-		self.Bind(wx.EVT_BUTTON, self.startDirProcessing,      startProcButton)
+		titleSizer.Add(targetDirectoryLabel,                            0, 0, 0)
+		titleSizer.Add(self.startAddress,                               1, wx.EXPAND, 0)
+		titleSizer.Add(selectDirButton,                                 0, wx.LEFT, 5)
+		titleSizer.Add(wx.StaticLine(parent, -1, style=wx.LI_VERTICAL), 0, wx.LEFT|wx.RIGHT|wx.EXPAND, 5)
+		titleSizer.Add(startProcButton,                                 0, 0, 0)
+
+
+
+		titleSizer.Add(sort_to_dir_label,                                0, 0, 0)
+		titleSizer.Add(self.sort_into_dir,                              1, wx.EXPAND, 0)
+		titleSizer.Add(self.select_sort_into_dir_button,                           0, wx.LEFT, 5)
+		titleSizer.Add(wx.StaticLine(parent, -1, style=wx.LI_VERTICAL), 0, wx.LEFT|wx.RIGHT|wx.EXPAND, 5)
+		titleSizer.Add(self.enable_disable_sort_to,                          0, 0, 0)
+
+
+
+		self.Bind(wx.EVT_BUTTON, self.selectDirPressed,          selectDirButton)
+		self.Bind(wx.EVT_BUTTON, self.startDirProcessing,        startProcButton)
+		self.Bind(wx.EVT_TOGGLEBUTTON, self._toggle_sort_to_evt, self.enable_disable_sort_to)
+
+		self.enable_disable_sort_to.SetValue(self.config.enable_sort_to_dir)
+		self._toggle_sort_to_evt(None)
 
 		return titleSizer
+
+	def _toggle_sort_to_evt(self, evt):
+		self.config.enable_sort_to_dir = self.enable_disable_sort_to.GetValue()
+
+		if self.config.enable_sort_to_dir:
+			self.sort_into_dir.Disable()
+			self.select_sort_into_dir_button.Disable()
+			self.enable_disable_sort_to.SetLabelText("Enable")
+		else:
+			self.sort_into_dir.Enable()
+			self.select_sort_into_dir_button.Enable()
+			self.enable_disable_sort_to.SetLabelText("Disable")
 
 	def __create_tree_pane_sizer(self, parent):
 		generalSimSliderLabel    = wx.StaticText(parent, -1, "Similarity Grouping Threshold")
@@ -340,7 +367,7 @@ class MainFrame(wx.Frame):
 		MainSizer = wx.BoxSizer(wx.VERTICAL)
 		MainSizer.Add(self.__create_title_sizer(self), 0, wx.EXPAND, 0)
 		MainSizer.Add(self.notebook, 1, wx.EXPAND, 0)
-		MainSizer.Add(self.StatusText, 0, wx.ALL, 5)
+		# MainSizer.Add(self.StatusText, 0, wx.ALL, 5)
 		self.SetSizer(MainSizer)
 		MainSizer.Fit(self)
 		self.Layout()
@@ -423,7 +450,10 @@ class MainFrame(wx.Frame):
 
 		#self.notebookFilePane.Update()
 		self.notebookFilePane.Refresh()
-		self.fileTree.EnsureVisible(self.treeRoot)	#IF you don't have this, the scroll bar in on the treectrl won't appear untill you manually change the size ov one of the items in it.
+
+		#IF you don't have this, the scroll bar in on the treectrl won't appear untill you manually change the size of one of the items in it.
+		self.fileTree.EnsureVisible(self.treeRoot)
+
 		#self.Update()
 		#self.Refresh()
 
@@ -437,7 +467,10 @@ class MainFrame(wx.Frame):
 
 		#self.notebookFilePane.Update()
 		self.notebookFilePane.Refresh()
-		self.fileTree.EnsureVisible(self.treeRoot)	#IF you don't have this, the scroll bar in on the treectrl won't appear untill you manually change the size ov one of the items in it.
+
+		#IF you don't have this, the scroll bar in on the treectrl won't appear untill you manually change the size of one of the items in it.
+		self.fileTree.EnsureVisible(self.treeRoot)
+
 		#self.Update()
 		#self.Refresh()
 
@@ -475,7 +508,10 @@ class MainFrame(wx.Frame):
 
 		#self.notebookFilePane.Update()
 		self.notebookFilePane.Refresh()
-		self.fileTree.EnsureVisible(self.treeRoot)	#IF you don't have this, the scroll bar in on the treectrl won't appear untill you manually change the size ov one of the items in it.
+
+		#IF you don't have this, the scroll bar in on the treectrl won't appear untill you manually change the size of one of the items in it.
+		self.fileTree.EnsureVisible(self.treeRoot)
+
 		#self.Update()
 		#self.Refresh()
 
@@ -490,7 +526,10 @@ class MainFrame(wx.Frame):
 
 		#self.notebookFilePane.Update()
 		self.notebookFilePane.Refresh()
-		self.fileTree.EnsureVisible(self.treeRoot)	#IF you don't have this, the scroll bar in on the treectrl won't appear untill you manually change the size ov one of the items in it.
+
+		#IF you don't have this, the scroll bar in on the treectrl won't appear untill you manually change the size of one of the items in it.
+		self.fileTree.EnsureVisible(self.treeRoot)
+
 		#self.Update()
 		#self.Refresh()
 		event.Skip()
@@ -580,40 +619,53 @@ class MainFrame(wx.Frame):
 		self.valueWordLengthDifferenceWeighting.SetLabel("%s" % textVal)
 
 
+	# def addTreeNodes(self, parentItem, items):
 
-
-	def addTreeNodes(self, parentItem, items):
-
-		for item in items:
-			if isinstance(item, str):
-				self.fileTree.AppendItem(parentItem, item)
-			else:
-				newItem = self.fileTree.AppendItem(parentItem, item[0])
-				self.addTreeNodes(newItem, item)
+	# 	for item in items:
+	# 		if isinstance(item, str):
+	# 			self.fileTree.AppendItem(parentItem, item)
+	# 		else:
+	# 			newItem = self.fileTree.AppendItem(parentItem, item[0])
+	# 			self.addTreeNodes(newItem, item)
 
 	def addDicttoTree(self, filesList):
 		self.fileTree.DeleteChildren(self.treeRoot)
 		fnLen = 0
 		cnLen = 0
 		for group in filesList:
-			#print "Group"
-			#print group.keys()[0].cn
 			#thisBranch = self.fileTree.AppendItem(self.treeRoot, group.keys()[0].cn.title(), ct_type=1)
 
 			for itemdict, simVal in group.items():
-				tLen = len(itemdict.fn)
-				if tLen > fnLen:
-					fnLen = tLen
-				tLen = len(itemdict.cn)
-				if tLen > cnLen:
-					cnLen = tLen
+				tLen_1 = len(itemdict.fn)
+				if tLen_1 > fnLen:
+					fnLen = tLen_1
+				tLen_2 = len(itemdict.cn)
+				if tLen_2 > cnLen:
+					cnLen = tLen_2
+
 		for group in filesList:
 			#print "Group"
 			#print group.keys()[0].cn
 			thisBranch = self.fileTree.AppendItem(self.treeRoot, list(group.keys())[0].cn.title(), ct_type=1)
 
+			fnLen = 0
+			cnLen = 0
+			for itemdict, simVal in group.items():
+				tLen_1 = len(itemdict.fn)
+				if tLen_1 > fnLen:
+					fnLen = tLen_1
+				tLen_2 = len(itemdict.cn)
+				if tLen_2 > cnLen:
+					cnLen = tLen_2
+
 			for itemdict, simVal in list(group.items()):
-				self.fileTree.AppendItem(thisBranch, "Cleaned String - : %s : - Original String - : %s  : - Similarity Metric Value: %s" % (itemdict.cn.ljust(cnLen+1), itemdict.fn.ljust(fnLen+1), simVal), ct_type=1, data=itemdict)
+				self.fileTree.AppendItem(thisBranch, "Cleaned String - : %s : - Original String - : %s  : - Similarity Metric Value: %s" %
+						(
+							itemdict.cn.ljust(cnLen+1),
+							itemdict.fn.ljust(fnLen+1),
+							simVal
+						),
+					ct_type=1, data=itemdict)
 				#print self.fileTree.SetPyData(leafID, (itemdict, simVal))
 				#print "	", itemdict.fn
 			#print fnLen, cnLen

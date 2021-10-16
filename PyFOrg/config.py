@@ -1,19 +1,3 @@
-import os.path
-# To change this template, choose Tools | Templates
-# and open the template in the editor.
-import sys
-import os
-import re
-import math
-import Levenshtein as Lv
-import timeit
-import numpy as np
-import tempfile
-
-import wx
-
-import h5py
-
 
 
 	#def __repr__(self):
@@ -36,6 +20,8 @@ class ConfigObj(object):
 
 		self.mappingDict             = {}
 		self.target_dir              = "~/"
+		self.sort_to_dir             = ""
+		self.enable_sort_to_dir      = True
 
 
 	def getCompThresh(self):
@@ -43,6 +29,8 @@ class ConfigObj(object):
 
 	def dump(self):
 		config = {}
+		config["enable_sort_to_dir"]       = self.enable_sort_to_dir
+		config["sort_to_dir"]              = self.sort_to_dir
 		config["target_dir"]               = self.target_dir
 		config["compThreshold"]            = self.compThreshold
 
@@ -61,6 +49,8 @@ class ConfigObj(object):
 
 	def load(self, config):
 
+		self.enable_sort_to_dir       = config["enable_sort_to_dir"]
+		self.sort_to_dir              = config["sort_to_dir"]
 		self.target_dir               = config["target_dir"]
 		self.compThreshold            = config["compThreshold"]
 		self.wordLengthWeighting      = config["wordLengthWeighting"]
