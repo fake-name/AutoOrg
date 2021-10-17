@@ -3,3 +3,5 @@
 /config.pik
 /wxGlade/*.bak
 __pycache__
+config.json
+/PyFOrg-v2/config.json
