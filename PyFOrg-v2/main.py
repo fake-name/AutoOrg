@@ -1,7 +1,7 @@
 
 import sys
 from PySide2.QtWidgets import QApplication
-import gui_events
+from pyforg import gui_events
 
 
 def go():

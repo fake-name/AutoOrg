@@ -1,7 +1,7 @@
 {
     "enable_sort_to_dir": true,
     "sort_to_dir": "N:/LightNovels/Officially Translated Light Novels - EPubs",
-    "sort_from_dir": "N:/LightNovels/Various Files",
+    "sort_from_dir": "N:/LightNovels",
     "comp_threshold": 1500,
     "word_length_weighting": 1000.0,
     "str_length_weighting": 1000.0,

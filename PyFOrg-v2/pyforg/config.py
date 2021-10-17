@@ -83,7 +83,7 @@ class ConfigObj(object):
 			'sort_to_dir',
 			'enable_sort_to_dir',
 		]
-		assert key in ok_keys
+		assert key in ok_keys, "Trying to set invalid key '%s'" % key
 
 		super().__setattr__(key, value)
 

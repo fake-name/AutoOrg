@@ -1,12 +1,14 @@
 # This Python file uses the following encoding: utf-8
-import sys
+import shutil
+import os
 import json
 from PySide2.QtWidgets import QFileDialog
 from PySide2.QtWidgets import QWidget
 from PySide2.QtWidgets import QMainWindow
 
-import gui_gen
-import config
+from . import gui_gen
+from . import config
+from . import file_comparator
 
 class PyFOrg(QMainWindow):
 	def __init__(self):
@@ -67,17 +69,17 @@ class PyFOrg(QMainWindow):
 		self.gui.text_clean_curly_brackets_checkbox.stateChanged.connect(self.handler_update_checkboxes_config_evt)
 
 
-		# self.Bind(wx.EVT_BUTTON, self.expand_tree,                                 expand_all_tree_branches_button)
-		# self.Bind(wx.EVT_BUTTON, self.expand_checked_tree_items,                   expand_checked_items_button)
-		# self.Bind(wx.EVT_BUTTON, self.check_all_tree_items,                        check_all_items_button)
-		# self.Bind(wx.EVT_BUTTON, self.collapse_checked_tree_items,                 collapse_checked_items_button)
-		# self.Bind(wx.EVT_BUTTON, self.collapse_tree,                               collapse_all_tree_branches_button)
-		# self.Bind(wx.EVT_BUTTON, self.uncheck_all_tree_items,                      uncheck_all_items_button)
-		# self.Bind(wx.EVT_BUTTON, self.check_items_with_threshold,                  button_check_items)
+		self.gui.expand_tree                .clicked.connect(self.handler_expand_tree)
+		self.gui.expand_checked_tree_items  .clicked.connect(self.handler_expand_checked_tree_items)
+		self.gui.check_all_tree_items       .clicked.connect(self.handler_check_all_tree_items)
+		self.gui.collapse_checked_tree_items.clicked.connect(self.handler_collapse_checked_tree_items)
+		self.gui.collapse_tree              .clicked.connect(self.handler_collapse_tree)
+		self.gui.uncheck_all_tree_items     .clicked.connect(self.handler_uncheck_all_tree_items)
 
-		# self.Bind(wx.EVT_BUTTON, self.move_selected_items_into_new_folders,        button_move_files)
-		# self.Bind(wx.EVT_BUTTON, self.start_dir_processing,                        start_proc_button)
+		self.gui.button_check_items         .clicked.connect(self.handler_check_items_with_threshold)
 
+		self.gui.button_move_files          .clicked.connect(self.handler_move_selected_items_into_new_folders)
+		self.gui.start_proc_button          .clicked.connect(self.handler_start_dir_processing)
 
 		self.gui.select_dir_button          .clicked.connect(self.handler_select_source_dir_pressed)
 		self.gui.select_sort_into_dir_button.clicked.connect(self.handler_select_target_dir_pressed)
@@ -154,10 +156,10 @@ class PyFOrg(QMainWindow):
 			self.config.compThreshold = self.compThresholdSlider.GetValue()
 			print("Recomputing similarity tree")
 			print("Trimming Tree")
-			self.trimmedDict = self.compar.trimTree(self.config.getCompThresh())
+			self.trimmed_dict = self.compar.trimTree(self.config.getCompThresh())
 			#print "Adding Tree"
-			#print self.trimmedDict
-			self.addDicttoTree(self.trimmedDict)
+			#print self.trimmed_dict
+			self.add_dict_to_tree(self.trimmed_dict)
 		except:
 			print("Need to run comparison first")
 
@@ -184,11 +186,6 @@ class PyFOrg(QMainWindow):
 
 			event.accept()
 
-
-	# ----------------------------------------------
-	# To Update
-
-
 	def handler_start_dir_processing(self, event):
 				#try:
 		#	self.compar.close()
@@ -196,26 +193,33 @@ class PyFOrg(QMainWindow):
 		#	pass
 		#the GC seems to catch and delete self.compar, unless sys.exit(0) is called
 
-		self.fileSourceDir = self.startAddress.GetValue()
-		self.config.stripTerms = self.filenameCleanerTextCtrl.Value.split(":")
-		print("Stripping Terms: ", self.config.stripTerms)
+		file_source_dir = self.gui.sort_source_location.text()
+		terms = self.gui.filename_cleaner_text_ctrl.text().split(":")
+		terms = [tmp for tmp in terms if tmp]
+		self.config.strip_terms = terms
+		print("Stripping Terms: ", self.config.strip_terms)
 
 
-		if os.access(self.fileSourceDir, os.F_OK):
+		if os.access(file_source_dir, os.F_OK):
 			print("Path OK")
 			self.compar = file_comparator.Comparator(self.config)
-			self.compar.comp(self.fileSourceDir)
+			self.compar.comp(file_source_dir)
 
-			self.trimmedDict = self.compar.trimTree(self.config.getCompThresh())
+			self.trimmed_dict = self.compar.trimTree(self.config.getCompThresh())
 			print("Adding to Tree", end=' ')
-			#print self.trimmedDict
-			if len(self.trimmedDict) < 1:
+			#print self.trimmed_dict
+			if len(self.trimmed_dict) < 1:
 				print("No items. Either folder is empty or thresholds are set incorrectly.")
-			self.addDicttoTree(self.trimmedDict)
+			self.add_dict_to_tree(self.trimmed_dict)
 		else:
-			print("Cannot Access Path %s" % self.fileSourceDir)
+			print("Cannot Access Path %s" % file_source_dir)
 
 		event.Skip()
+
+	# ----------------------------------------------
+	# To Update
+
+
 
 
 	def handler_check_items_with_threshold(self, event):
@@ -332,14 +336,14 @@ class PyFOrg(QMainWindow):
 
 	def handler_move_selected_items_into_new_folders(self, event):
 		openFolder = wx.DirDialog (self, message = "Select Folder")
-		openFolder.SetPath(self.fileSourceDir)
+		openFolder.SetPath(self.file_source_dir)
 		if openFolder.ShowModal() == wx.ID_OK:
 			targetDir = openFolder.GetPath()
 
 		print(targetDir)
 		mainLevel = self.treeRoot.GetChildren()
 
-		if self.fileSourceDir is not None and mainLevel is not [None]:
+		if self.file_source_dir is not None and mainLevel is not [None]:
 			for item in self.treeRoot.GetChildren():
 				if item.IsChecked():
 					currWorkingDir = os.path.join(targetDir, item.GetText())
@@ -348,7 +352,7 @@ class PyFOrg(QMainWindow):
 					for child in item.GetChildren():
 						if child.IsChecked():
 							fileName = child.GetData().fn
-							originalFullPath = os.path.join(self.fileSourceDir, fileName)
+							originalFullPath = os.path.join(self.file_source_dir, fileName)
 							destFullPath = os.path.join(currWorkingDir, fileName)
 							print("	", originalFullPath, end=' ')
 							if os.access(originalFullPath, os.F_OK):
@@ -369,7 +373,7 @@ class PyFOrg(QMainWindow):
 	# 			newItem = self.fileTree.AppendItem(parentItem, item[0])
 	# 			self.addTreeNodes(newItem, item)
 
-	def addDicttoTree(self, filesList):
+	def add_dict_to_tree(self, filesList):
 		self.fileTree.DeleteChildren(self.treeRoot)
 		fnLen = 0
 		cnLen = 0
