@@ -75,10 +75,14 @@ class Ui_MainWidget(object):
 
         self.verticalLayout.addLayout(self.gridLayout)
 
-        self.treeView = QTreeView(self.view_tab)
-        self.treeView.setObjectName(u"treeView")
+        self.file_tree = QTreeWidget(self.view_tab)
+        self.file_tree.setObjectName(u"file_tree")
+        self.file_tree.setAlternatingRowColors(True)
+        self.file_tree.setSortingEnabled(True)
+        self.file_tree.setColumnCount(3)
+        self.file_tree.header().setMinimumSectionSize(100)
 
-        self.verticalLayout.addWidget(self.treeView)
+        self.verticalLayout.addWidget(self.file_tree)
 
         self.horizontalLayout_6 = QHBoxLayout()
         self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
@@ -113,8 +117,10 @@ class Ui_MainWidget(object):
         self.check_all_slder_sizer.setObjectName(u"check_all_slder_sizer")
         self.slider_num_file_for_checking = QSlider(self.view_tab)
         self.slider_num_file_for_checking.setObjectName(u"slider_num_file_for_checking")
-        self.slider_num_file_for_checking.setMinimum(1)
+        self.slider_num_file_for_checking.setMinimumSize(QSize(80, 27))
+        self.slider_num_file_for_checking.setMinimum(2)
         self.slider_num_file_for_checking.setMaximum(10)
+        self.slider_num_file_for_checking.setValue(3)
         self.slider_num_file_for_checking.setOrientation(Qt.Horizontal)
         self.slider_num_file_for_checking.setTickPosition(QSlider.TicksAbove)
         self.slider_num_file_for_checking.setTickInterval(1)
@@ -137,35 +143,45 @@ class Ui_MainWidget(object):
 
         self.expand_contract_buttons_sizer = QGridLayout()
         self.expand_contract_buttons_sizer.setObjectName(u"expand_contract_buttons_sizer")
-        self.expand_tree = QPushButton(self.view_tab)
-        self.expand_tree.setObjectName(u"expand_tree")
-
-        self.expand_contract_buttons_sizer.addWidget(self.expand_tree, 0, 0, 1, 1)
-
         self.expand_checked_tree_items = QPushButton(self.view_tab)
         self.expand_checked_tree_items.setObjectName(u"expand_checked_tree_items")
 
-        self.expand_contract_buttons_sizer.addWidget(self.expand_checked_tree_items, 0, 1, 1, 1)
+        self.expand_contract_buttons_sizer.addWidget(self.expand_checked_tree_items, 0, 2, 1, 1)
 
         self.collapse_checked_tree_items = QPushButton(self.view_tab)
         self.collapse_checked_tree_items.setObjectName(u"collapse_checked_tree_items")
 
-        self.expand_contract_buttons_sizer.addWidget(self.collapse_checked_tree_items, 1, 1, 1, 1)
+        self.expand_contract_buttons_sizer.addWidget(self.collapse_checked_tree_items, 1, 2, 1, 1)
+
+        self.expand_tree = QPushButton(self.view_tab)
+        self.expand_tree.setObjectName(u"expand_tree")
+
+        self.expand_contract_buttons_sizer.addWidget(self.expand_tree, 0, 1, 1, 1)
 
         self.collapse_tree = QPushButton(self.view_tab)
         self.collapse_tree.setObjectName(u"collapse_tree")
 
-        self.expand_contract_buttons_sizer.addWidget(self.collapse_tree, 1, 0, 1, 1)
+        self.expand_contract_buttons_sizer.addWidget(self.collapse_tree, 1, 1, 1, 1)
+
+        self.expand_unchecked_tree_items = QPushButton(self.view_tab)
+        self.expand_unchecked_tree_items.setObjectName(u"expand_unchecked_tree_items")
+
+        self.expand_contract_buttons_sizer.addWidget(self.expand_unchecked_tree_items, 0, 3, 1, 1)
+
+        self.collapse_unchecked_tree_items = QPushButton(self.view_tab)
+        self.collapse_unchecked_tree_items.setObjectName(u"collapse_unchecked_tree_items")
+
+        self.expand_contract_buttons_sizer.addWidget(self.collapse_unchecked_tree_items, 1, 3, 1, 1)
 
         self.check_all_tree_items = QPushButton(self.view_tab)
         self.check_all_tree_items.setObjectName(u"check_all_tree_items")
 
-        self.expand_contract_buttons_sizer.addWidget(self.check_all_tree_items, 0, 2, 1, 1)
+        self.expand_contract_buttons_sizer.addWidget(self.check_all_tree_items, 0, 0, 1, 1)
 
         self.uncheck_all_tree_items = QPushButton(self.view_tab)
         self.uncheck_all_tree_items.setObjectName(u"uncheck_all_tree_items")
 
-        self.expand_contract_buttons_sizer.addWidget(self.uncheck_all_tree_items, 1, 2, 1, 1)
+        self.expand_contract_buttons_sizer.addWidget(self.uncheck_all_tree_items, 1, 0, 1, 1)
 
 
         self.horizontalLayout_7.addLayout(self.expand_contract_buttons_sizer)
@@ -352,15 +368,21 @@ class Ui_MainWidget(object):
         self.select_sort_into_dir_button.setText(QCoreApplication.translate("MainWidget", u"Select Directory", None))
         self.start_proc_button.setText(QCoreApplication.translate("MainWidget", u"Run Sort", None))
         self.enable_disable_sort_to.setText(QCoreApplication.translate("MainWidget", u"Enable", None))
+        ___qtreewidgetitem = self.file_tree.headerItem()
+        ___qtreewidgetitem.setText(2, QCoreApplication.translate("MainWidget", u"Similarity", None));
+        ___qtreewidgetitem.setText(1, QCoreApplication.translate("MainWidget", u"Raw Filename", None));
+        ___qtreewidgetitem.setText(0, QCoreApplication.translate("MainWidget", u"Cleaned Filename", None));
         self.general_sim_slider_label.setText(QCoreApplication.translate("MainWidget", u"Similarity Grouping Threshold", None))
         self.com_threshold_slider_value_label.setText(QCoreApplication.translate("MainWidget", u"1.000", None))
         self.button_check_items.setText(QCoreApplication.translate("MainWidget", u"Check all items with at least", None))
-        self.slider_num_file_for_checking_label.setText(QCoreApplication.translate("MainWidget", u"2", None))
+        self.slider_num_file_for_checking_label.setText(QCoreApplication.translate("MainWidget", u"3", None))
         self.file_pane_file_ops_label2.setText(QCoreApplication.translate("MainWidget", u"items in group.", None))
-        self.expand_tree.setText(QCoreApplication.translate("MainWidget", u"Expand Tree", None))
         self.expand_checked_tree_items.setText(QCoreApplication.translate("MainWidget", u"Expand Checked", None))
         self.collapse_checked_tree_items.setText(QCoreApplication.translate("MainWidget", u"Collapse Checked", None))
+        self.expand_tree.setText(QCoreApplication.translate("MainWidget", u"Expand Tree", None))
         self.collapse_tree.setText(QCoreApplication.translate("MainWidget", u"Collapse Tree", None))
+        self.expand_unchecked_tree_items.setText(QCoreApplication.translate("MainWidget", u"Expand Unchecked", None))
+        self.collapse_unchecked_tree_items.setText(QCoreApplication.translate("MainWidget", u"Collapse Unchecked", None))
         self.check_all_tree_items.setText(QCoreApplication.translate("MainWidget", u"Check All", None))
         self.uncheck_all_tree_items.setText(QCoreApplication.translate("MainWidget", u"Uncheck All", None))
         self.button_move_files.setText(QCoreApplication.translate("MainWidget", u"Move selected files into Directory (Opens Folder Picker)", None))

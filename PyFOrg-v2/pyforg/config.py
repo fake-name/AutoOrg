@@ -39,11 +39,11 @@ class ConfigObj(object):
 		config["word_difference_weighting"]  = self.word_difference_weighting
 
 		config["strip_terms"]               = self.strip_terms
-		config["stripStr"]                 = self.strip_str
+		config["strip_str"]                 = self.strip_str
 
 		config["brackets"]                 = self.brackets
 		config["parentheses"]              = self.parentheses
-		config["curlyBraces"]              = self.curly_braces
+		config["curly_braces"]              = self.curly_braces
 
 		return config
 
@@ -62,7 +62,7 @@ class ConfigObj(object):
 
 		self.brackets                   = config["brackets"]
 		self.parentheses                = config["parentheses"]
-		self.curly_braces               = config["curlyBraces"]
+		self.curly_braces               = config["curly_braces"]
 
 		return
 

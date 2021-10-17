@@ -90,7 +90,35 @@
         </layout>
        </item>
        <item>
-        <widget class="QTreeView" name="treeView"/>
+        <widget class="QTreeWidget" name="file_tree">
+         <property name="alternatingRowColors">
+          <bool>true</bool>
+         </property>
+         <property name="sortingEnabled">
+          <bool>true</bool>
+         </property>
+         <property name="columnCount">
+          <number>3</number>
+         </property>
+         <attribute name="headerMinimumSectionSize">
+          <number>100</number>
+         </attribute>
+         <column>
+          <property name="text">
+           <string>Cleaned Filename</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Raw Filename</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Similarity</string>
+          </property>
+         </column>
+        </widget>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_6">
@@ -133,11 +161,20 @@
           <layout class="QVBoxLayout" name="check_all_slder_sizer">
            <item>
             <widget class="QSlider" name="slider_num_file_for_checking">
+             <property name="minimumSize">
+              <size>
+               <width>80</width>
+               <height>27</height>
+              </size>
+             </property>
              <property name="minimum">
-              <number>1</number>
+              <number>2</number>
              </property>
              <property name="maximum">
               <number>10</number>
+             </property>
+             <property name="value">
+              <number>3</number>
              </property>
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -153,7 +190,7 @@
            <item>
             <widget class="QLabel" name="slider_num_file_for_checking_label">
              <property name="text">
-              <string>2</string>
+              <string>3</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
@@ -171,42 +208,56 @@
          </item>
          <item>
           <layout class="QGridLayout" name="expand_contract_buttons_sizer">
-           <item row="0" column="0">
-            <widget class="QPushButton" name="expand_tree">
-             <property name="text">
-              <string>Expand Tree</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
+           <item row="0" column="2">
             <widget class="QPushButton" name="expand_checked_tree_items">
              <property name="text">
               <string>Expand Checked</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="1">
+           <item row="1" column="2">
             <widget class="QPushButton" name="collapse_checked_tree_items">
              <property name="text">
               <string>Collapse Checked</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="0">
+           <item row="0" column="1">
+            <widget class="QPushButton" name="expand_tree">
+             <property name="text">
+              <string>Expand Tree</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
             <widget class="QPushButton" name="collapse_tree">
              <property name="text">
               <string>Collapse Tree</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="2">
+           <item row="0" column="3">
+            <widget class="QPushButton" name="expand_unchecked_tree_items">
+             <property name="text">
+              <string>Expand Unchecked</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="3">
+            <widget class="QPushButton" name="collapse_unchecked_tree_items">
+             <property name="text">
+              <string>Collapse Unchecked</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
             <widget class="QPushButton" name="check_all_tree_items">
              <property name="text">
               <string>Check All</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="2">
+           <item row="1" column="0">
             <widget class="QPushButton" name="uncheck_all_tree_items">
              <property name="text">
               <string>Uncheck All</string>
