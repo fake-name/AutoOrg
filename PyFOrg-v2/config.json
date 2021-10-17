@@ -1,15 +1,13 @@
 {
     "enable_sort_to_dir": true,
-    "sort_to_dir": "",
-    "target_dir": "N:\\LightNovels\\Various Files",
-    "compThreshold": 1277,
-    "wordLengthWeighting": 1016.0,
-    "strLengthWeighting": 1000.0,
-    "wordDifferenceWeighting\t": 1000.0,
-    "stripTerms": [
-        ""
-    ],
-    "stripStr": "asd",
+    "sort_to_dir": "N:/LightNovels/Officially Translated Light Novels - EPubs",
+    "sort_from_dir": "N:/LightNovels/Various Files",
+    "comp_threshold": 1500,
+    "word_length_weighting": 1000.0,
+    "str_length_weighting": 1000.0,
+    "word_difference_weighting": 1000.0,
+    "strip_terms": [],
+    "stripStr": "",
     "brackets": true,
     "parentheses": true,
     "curlyBraces": true

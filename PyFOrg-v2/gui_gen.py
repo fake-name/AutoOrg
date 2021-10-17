@@ -89,6 +89,7 @@ class Ui_MainWidget(object):
 
         self.comp_threshold_slider = QSlider(self.view_tab)
         self.comp_threshold_slider.setObjectName(u"comp_threshold_slider")
+        self.comp_threshold_slider.setMaximum(5000)
         self.comp_threshold_slider.setOrientation(Qt.Horizontal)
 
         self.horizontalLayout_6.addWidget(self.comp_threshold_slider)
@@ -195,10 +196,10 @@ class Ui_MainWidget(object):
 
         self.verticalLayout_3.addWidget(self.config_tab_filename_cleaner_heading_static_text)
 
-        self.lineEdit = QLineEdit(self.settings_tab)
-        self.lineEdit.setObjectName(u"lineEdit")
+        self.filename_cleaner_text_ctrl = QLineEdit(self.settings_tab)
+        self.filename_cleaner_text_ctrl.setObjectName(u"filename_cleaner_text_ctrl")
 
-        self.verticalLayout_3.addWidget(self.lineEdit)
+        self.verticalLayout_3.addWidget(self.filename_cleaner_text_ctrl)
 
         self.strip_list_doc_label = QLabel(self.settings_tab)
         self.strip_list_doc_label.setObjectName(u"strip_list_doc_label")

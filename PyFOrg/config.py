@@ -64,7 +64,5 @@ class ConfigObj(object):
 		self.parentheses              = config["parentheses"]
 		self.curlyBraces              = config["curlyBraces"]
 
-		return
-
 
 

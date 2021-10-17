@@ -19,7 +19,7 @@ class ConfigObj(object):
 		self.curly_braces              = True
 
 		self.mapping_dict              = {}
-		self.target_dir                = "~/"
+		self.sort_from_dir             = "~/"
 		self.sort_to_dir               = ""
 		self.enable_sort_to_dir        = True
 
@@ -31,14 +31,14 @@ class ConfigObj(object):
 		config = {}
 		config["enable_sort_to_dir"]       = self.enable_sort_to_dir
 		config["sort_to_dir"]              = self.sort_to_dir
-		config["target_dir"]               = self.target_dir
-		config["compThreshold"]            = self.comp_threshold
+		config["sort_from_dir"]               = self.sort_from_dir
+		config["comp_threshold"]            = self.comp_threshold
 
-		config["wordLengthWeighting"]      = self.word_length_weighting
-		config["strLengthWeighting"]       = self.str_length_weighting
-		config["wordDifferenceWeighting	"] = self.word_difference_weighting
+		config["word_length_weighting"]      = self.word_length_weighting
+		config["str_length_weighting"]       = self.str_length_weighting
+		config["word_difference_weighting"]  = self.word_difference_weighting
 
-		config["stripTerms"]               = self.strip_terms
+		config["strip_terms"]               = self.strip_terms
 		config["stripStr"]                 = self.strip_str
 
 		config["brackets"]                 = self.brackets
@@ -51,20 +51,42 @@ class ConfigObj(object):
 
 		self.enable_sort_to_dir         = config["enable_sort_to_dir"]
 		self.sort_to_dir                = config["sort_to_dir"]
-		self.target_dir                 = config["target_dir"]
-		self.comp_threshold             = config["compThreshold"]
-		self.word_length_weighting      = config["wordLengthWeighting"]
-		self.str_length_weightingconfig = config["strLengthWeighting"]
-		self.word_difference_weighting  = config["wordDifferenceWeighting"]
+		self.sort_from_dir                 = config["sort_from_dir"]
+		self.comp_threshold             = config["comp_threshold"]
+		self.word_length_weighting      = config["word_length_weighting"]
+		self.str_length_weighting       = config["str_length_weighting"]
+		self.word_difference_weighting  = config["word_difference_weighting"]
 
-		self.strip_terms                = config["stripTerms"]
-		self.strip_str                  = config["stripStr"]
+		self.strip_terms                = config["strip_terms"]
+		self.strip_str                  = config["strip_str"]
 
 		self.brackets                   = config["brackets"]
 		self.parentheses                = config["parentheses"]
 		self.curly_braces               = config["curlyBraces"]
 
 		return
+
+	def __setattr__(self, key, value):
+
+		ok_keys = [
+			'comp_threshold',
+			'word_length_weighting',
+			'str_length_weighting',
+			'word_difference_weighting',
+			'strip_terms',
+			'strip_str',
+			'brackets',
+			'parentheses',
+			'curly_braces',
+			'mapping_dict',
+			'sort_from_dir',
+			'sort_to_dir',
+			'enable_sort_to_dir',
+		]
+		assert key in ok_keys
+
+		super().__setattr__(key, value)
+
 
 
 

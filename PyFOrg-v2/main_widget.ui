@@ -103,6 +103,9 @@
          </item>
          <item>
           <widget class="QSlider" name="comp_threshold_slider">
+           <property name="maximum">
+            <number>5000</number>
+           </property>
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
@@ -248,7 +251,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="lineEdit"/>
+        <widget class="QLineEdit" name="filename_cleaner_text_ctrl"/>
        </item>
        <item>
         <widget class="QLabel" name="strip_list_doc_label">

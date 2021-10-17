@@ -1,5 +1,7 @@
 # This Python file uses the following encoding: utf-8
 import sys
+import json
+from PySide2.QtWidgets import QFileDialog
 from PySide2.QtWidgets import QWidget
 from PySide2.QtWidgets import QMainWindow
 
@@ -32,31 +34,37 @@ class PyFOrg(QMainWindow):
 			pass
 
 
-		# self.gui.comp_threshold_slider                  .SetValue(self.config.compThreshold)
-		# self.gui.slider_word_length_weighting            .SetValue(self.config.wordDifferenceWeighting)
-		# self.gui.slider_str_length_difference_weighting   .SetValue(self.config.strLengthWeighting)
-		# self.gui.slider_word_length_difference_weighting  .SetValue(self.config.word_length_weighting)
-		# self.gui.filename_cleaner_text_ctrl                         = wx.TextCtrl(parent, -1, self.config.stripStr)
-		# self.gui.text_clean_parentheses_checkbox.Value              = self.config.parentheses
-		# self.gui.text_clean_brackets_checkbox.Value                 = self.config.brackets
-		# self.gui.text_clean_curly_brackets_checkbox.Value            = self.config.curlyBraces
-		# self.gui.start_address                               = wx.TextCtrl(parent, -1, self.config.target_dir)
-		# self.gui.sort_into_dir                              = wx.TextCtrl(parent, -1, self.config.sort_to_dir)
-		self.gui.enable_disable_sort_to               .setChecked(self.config.enable_sort_to_dir)
+		self.gui.comp_threshold_slider                    .setValue(self.config.comp_threshold)
+		self.gui.slider_word_length_weighting             .setValue(self.config.word_length_weighting)
+		self.gui.slider_str_length_difference_weighting   .setValue(self.config.str_length_weighting)
+		self.gui.slider_word_length_difference_weighting  .setValue(self.config.word_difference_weighting)
 
+
+		self.gui.filename_cleaner_text_ctrl               .setText(self.config.strip_str)
+		self.gui.sort_source_location                     .setText(self.config.sort_from_dir)
+		self.gui.sort_into_dir                            .setText(self.config.sort_to_dir)
+
+		self.gui.enable_disable_sort_to                   .setChecked(self.config.enable_sort_to_dir)
+
+		self.gui.text_clean_parentheses_checkbox          .setChecked(self.config.parentheses)
+		self.gui.text_clean_brackets_checkbox             .setChecked(self.config.brackets)
+		self.gui.text_clean_curly_brackets_checkbox       .setChecked(self.config.curly_braces)
+
+
+		# Update the labels
+		self.handler_threshold_slider_adjusted(None)
+		self.handler_word_length_weighting_adjusted(None)
+		self.handler_str_len_difference_adjusted(None)
+		self.handler_word_len_difference_weighting_adjusted(None)
 
 	def bind_signals(self):
 		self.gui.slider_word_length_weighting           .valueChanged.connect(self.handler_word_length_weighting_adjusted)
 		self.gui.slider_str_length_difference_weighting .valueChanged.connect(self.handler_str_len_difference_adjusted)
 		self.gui.slider_word_length_difference_weighting.valueChanged.connect(self.handler_word_len_difference_weighting_adjusted)
 
-		# self.Bind(wx.EVT_SCROLL_CHANGED, self.regen_notify,                           self.slider_word_length_weighting)
-		# self.Bind(wx.EVT_SCROLL_CHANGED, self.regen_notify,                           self.slider_str_length_difference_weighting)
-		# self.Bind(wx.EVT_SCROLL_CHANGED, self.regen_notify,                           self.slider_word_length_difference_weighting)
-
-		# self.Bind(wx.EVT_CHECKBOX, self.update_checkboxes_config_evt,                 self.text_clean_parentheses_checkbox)
-		# self.Bind(wx.EVT_CHECKBOX, self.update_checkboxes_config_evt,                 self.text_clean_brackets_checkbox)
-		# self.Bind(wx.EVT_CHECKBOX, self.update_checkboxes_config_evt,                 self.text_clean_curly_brackets_checkbox)
+		self.gui.text_clean_parentheses_checkbox   .stateChanged.connect(self.handler_update_checkboxes_config_evt)
+		self.gui.text_clean_brackets_checkbox      .stateChanged.connect(self.handler_update_checkboxes_config_evt)
+		self.gui.text_clean_curly_brackets_checkbox.stateChanged.connect(self.handler_update_checkboxes_config_evt)
 
 
 		# self.Bind(wx.EVT_BUTTON, self.expand_tree,                                 expand_all_tree_branches_button)
@@ -66,21 +74,41 @@ class PyFOrg(QMainWindow):
 		# self.Bind(wx.EVT_BUTTON, self.collapse_tree,                               collapse_all_tree_branches_button)
 		# self.Bind(wx.EVT_BUTTON, self.uncheck_all_tree_items,                      uncheck_all_items_button)
 		# self.Bind(wx.EVT_BUTTON, self.check_items_with_threshold,                  button_check_items)
+
 		# self.Bind(wx.EVT_BUTTON, self.move_selected_items_into_new_folders,        button_move_files)
-		# self.Bind(wx.EVT_BUTTON, self.select_dir_pressed,                          select_dir_button)
 		# self.Bind(wx.EVT_BUTTON, self.start_dir_processing,                        start_proc_button)
+
+
+		self.gui.select_dir_button          .clicked.connect(self.handler_select_source_dir_pressed)
+		self.gui.select_sort_into_dir_button.clicked.connect(self.handler_select_target_dir_pressed)
 
 		self.handler_toggle_sort_to_evt(None)
 		self.gui.enable_disable_sort_to.toggled.connect(self.handler_toggle_sort_to_evt)
 
-		# self.Bind(wx.EVT_COMMAND_SCROLL, self.threshold_slider_adjusted, self.comp_threshold_slider)
-
-		# self.Bind(wx.EVT_SCROLL_CHANGED, self.threshold_slider_changed,  self.comp_threshold_slider)
-
-		# self.Bind(wx.EVT_CLOSE, self.handler_close_event)
+		self.gui.comp_threshold_slider.valueChanged.connect(self.handler_threshold_slider_adjusted)
+		self.gui.comp_threshold_slider.sliderReleased.connect(self.handler_threshold_slider_changed)
 
 
-	def handler_toggle_sort_to_evt(self, evt):
+	def handler_select_source_dir_pressed(self, _event):
+
+		new_folder = QFileDialog.getExistingDirectory(self,
+			caption = 'Select source directory to sort',
+			dir = self.config.sort_from_dir)
+		if new_folder:
+			self.gui.sort_source_location.setText(new_folder)
+			self.config.sort_from_dir = new_folder
+
+	def handler_select_target_dir_pressed(self, _event):
+
+		new_folder = QFileDialog.getExistingDirectory(self,
+			caption = 'Select target directory to sort into',
+			dir = self.config.sort_to_dir)
+		if new_folder:
+			self.gui.sort_into_dir.setText(new_folder)
+			self.config.sort_to_dir = new_folder
+
+
+	def handler_toggle_sort_to_evt(self, _event):
 		self.config.enable_sort_to_dir = self.gui.enable_disable_sort_to.isChecked()
 
 		if self.config.enable_sort_to_dir:
@@ -92,34 +120,74 @@ class PyFOrg(QMainWindow):
 			self.gui.select_sort_into_dir_button.setEnabled(True)
 			self.gui.enable_disable_sort_to.setText("Disable")
 
-	def handler_word_length_weighting_adjusted(self, event):
+	def handler_word_length_weighting_adjusted(self, _event):
 		self.config.word_length_weighting = float(self.gui.slider_word_length_weighting.value())
 		textVal = self.config.word_length_weighting/1000
 		self.gui.value_word_length_weighting.setText("%0.3f" % textVal)
 
 
-	def handler_str_len_difference_adjusted(self, event):
+	def handler_str_len_difference_adjusted(self, _event):
 		self.config.str_length_weighting = float(self.gui.slider_str_length_difference_weighting.value())
 		textVal = self.config.str_length_weighting/1000
 		self.gui.value_str_length_difference_weighting.setText("%0.3f" % textVal)
 
-	def handler_word_len_difference_weighting_adjusted(self, event):
+	def handler_word_len_difference_weighting_adjusted(self, _event):
 		self.config.word_difference_weighting = float(self.gui.slider_word_length_difference_weighting.value())
 		textVal = self.config.word_difference_weighting/1000
 		self.gui.value_word_length_difference_weighting.setText("%0.3f" % textVal)
 
 
-	def handler_select_dir_pressed(self, event):
 
-		openFolder = wx.DirDialog (self, message = "Select Folder")
-		openFolder.SetPath(self.fileSourceDir)
-		if openFolder.ShowModal() == wx.ID_OK:
-			path = openFolder.GetPath()
+	def handler_threshold_slider_adjusted(self, _event):
+		self.config.comp_threshold = self.gui.comp_threshold_slider.value()
+		self.gui.com_threshold_slider_value_label.setText("%0.3f" % self.config.getCompThresh())
 
-			self.startAddress.SetValue(path)
-			self.config.target_dir = path
+	def handler_update_checkboxes_config_evt(self, _event):
+		self.config.parentheses  = self.gui.text_clean_parentheses_checkbox   .isChecked()
+		self.config.brackets     = self.gui.text_clean_brackets_checkbox      .isChecked()
+		self.config.curly_braces = self.gui.text_clean_curly_brackets_checkbox.isChecked()
 
-		event.Skip()
+	def handler_threshold_slider_changed(self):
+		try:
+			assert self.compar
+
+			self.config.compThreshold = self.compThresholdSlider.GetValue()
+			print("Recomputing similarity tree")
+			print("Trimming Tree")
+			self.trimmedDict = self.compar.trimTree(self.config.getCompThresh())
+			#print "Adding Tree"
+			#print self.trimmedDict
+			self.addDicttoTree(self.trimmedDict)
+		except:
+			print("Need to run comparison first")
+
+
+	def closeEvent(self, event):
+		print("Exiting")
+		try:
+			self.compar.close()
+		except:
+			pass
+
+
+		self.config.strip_str   = self.gui.filename_cleaner_text_ctrl.text()
+		self.config.sort_from_dir  = self.gui.sort_source_location.text()
+		self.config.sort_to_dir = self.gui.sort_into_dir.text()
+
+
+		with open("config.json", "w") as fp:
+			conf = json.dumps(
+				self.config.dump(),
+				indent = 4
+				)
+			fp.write(conf)
+
+			event.accept()
+
+
+	# ----------------------------------------------
+	# To Update
+
 
 	def handler_start_dir_processing(self, event):
 				#try:
@@ -292,33 +360,6 @@ class PyFOrg(QMainWindow):
 		print("Done moving Files")
 		event.Skip()
 
-	def handler_threshold_slider_adjusted(self, event):
-		self.config.compThreshold = self.compThresholdSlider.GetValue()
-		self.sliderValueLabel.setText("%s" % self.config.getCompThresh())
-
-	def handler_update_checkboxes_config_evt(self, event):
-		self.config.parentheses = self.textCleanParenthesesCheckbox.Value
-		self.config.brackets = self.textCleanBracketsCheckbox.Value
-		self.config.curlyBraces = self.textCleanCurlyBracketsCheckbox.Value
-
-		event.Skip()
-
-	def handler_threshold_slider_changed(self, event):
-		try:
-			assert self.compar
-
-			self.config.compThreshold = self.compThresholdSlider.GetValue()
-			print("Recomputing similarity tree")
-			print("Trimming Tree")
-			self.trimmedDict = self.compar.trimTree(self.config.getCompThresh())
-			#print "Adding Tree"
-			#print self.trimmedDict
-			self.addDicttoTree(self.trimmedDict)
-		except:
-			print("Need to run comparison first")
-
-
-
 	# def addTreeNodes(self, parentItem, items):
 
 	# 	for item in items:
@@ -379,9 +420,4 @@ class PyFOrg(QMainWindow):
 	def handler_regen_notify(self, event):
 		print("Note: you must rerun the file comparison to update results with new comparion coefficents")
 
-	def handler_close_event(self, event):
-		print("Exiting")
-		try:
-			self.compar.close()
-		except:
-			pass
+
