@@ -1,28 +1,13 @@
+
+
 import os.path
-# To change this template, choose Tools | Templates
-# and open the template in the editor.
-import sys
-import os
-import re
-import math
-import Levenshtein as Lv
-import timeit
-import numpy as np
 import tempfile
 
-import wx
-
+import numpy as np
 import h5py
-from . import filename_container
-from . import config
 
 
-	#def __repr__(self):
-	#	return (repr((self.fn, self.cn, self.pairs)))
-
-
-
-class ComutativeMatrix(object):
+class ComutativeMatrix:
 	# Matrix of simlarity values
 	# Setting array[fileid_num1, fileid_num2] = simVal adds item to array
 	# reading is accomplished by x = array[fileid_num1, fileid_num2]
@@ -31,11 +16,15 @@ class ComutativeMatrix(object):
 	# Therefore The order which you pass items, both to read and write is not important
 	# It should store the minimum ammount of information to hold the entirety of all comparison items
 
+	# This is oooooooooold, old enough that the original implementation was done on 32-bit windows
+	# XP (and python.....2.5, I think?). I had lots of issues with the 32-bit memory limit, which
+	# is why there's the ability to use a h5py memory-mapped onto a file.
+	# It let me exceed the memory limits of a 32-bit process.
+
 	def __init__(self, matrixSz):
 		self.matrixSz = matrixSz
 
 		if matrixSz > 5000:
-			print()
 			self.mmapped = True
 			self.tempF = tempfile.mkstemp()
 			self.f = h5py.File(self.tempF[1], 'w')
@@ -52,7 +41,7 @@ class ComutativeMatrix(object):
 		else:
 			print("Using in-memory array")
 			self.mmapped = False
-			self.m = np.zeros((matrixSz,matrixSz))
+			self.m = np.zeros((matrixSz, matrixSz))
 
 	def get(self, x, y):
 		if x <= y:

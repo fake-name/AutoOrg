@@ -1,6 +1,7 @@
 # To change this template, choose Tools | Templates
 # and open the template in the editor.
 import re
+import os.path
 import math
 import Levenshtein as Lv
 import timeit
@@ -64,7 +65,7 @@ class Filename():
 
 	gid = None
 
-	def __init__(self, filename, config, id_num):
+	def __init__(self, filename, config, id_num, containing_dir):
 
 		print("Comparing:", filename)
 		self.similarity_cache = None
@@ -99,6 +100,24 @@ class Filename():
 
 		self.fn = filename
 		self.cn = temp_cleaned
+		self.__src_path = containing_dir
+		self.__dest_path = None
+
+	@property
+	def src_path(self):
+		return os.path.normpath(self.__src_path)
+
+	@property
+	def dest_path(self):
+		return os.path.normpath(self.__dest_path)
+
+	@property
+	def src_fqpath(self):
+		return os.path.normpath(os.path.join(self.__src_path, self.fn))
+
+	@property
+	def dest_fqpath(self):
+		return os.path.normpath(os.path.join(self.__dest_path, self.fn))
 
 	@property
 	def id_num(self):
@@ -121,4 +140,8 @@ class Filename():
 		comp_value = compStr(self.cn, other_file.cn)
 		return comp_value
 		#compConf.mapMatrice[other_file.id_num, self.id_num] = comp_value
+
+	def set_dest_path(self, fpath):
+		print("Set dest path:", fpath)
+		self.__dest_path = fpath
 

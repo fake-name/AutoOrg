@@ -79,7 +79,7 @@ class Ui_MainWidget(object):
         self.file_tree.setObjectName(u"file_tree")
         self.file_tree.setAlternatingRowColors(True)
         self.file_tree.setSortingEnabled(True)
-        self.file_tree.setColumnCount(3)
+        self.file_tree.setColumnCount(5)
         self.file_tree.header().setMinimumSectionSize(100)
 
         self.verticalLayout.addWidget(self.file_tree)
@@ -369,7 +369,9 @@ class Ui_MainWidget(object):
         self.start_proc_button.setText(QCoreApplication.translate("MainWidget", u"Run Sort", None))
         self.enable_disable_sort_to.setText(QCoreApplication.translate("MainWidget", u"Enable", None))
         ___qtreewidgetitem = self.file_tree.headerItem()
-        ___qtreewidgetitem.setText(2, QCoreApplication.translate("MainWidget", u"Similarity", None));
+        ___qtreewidgetitem.setText(4, QCoreApplication.translate("MainWidget", u"Similarity", None));
+        ___qtreewidgetitem.setText(3, QCoreApplication.translate("MainWidget", u"Destination Path", None));
+        ___qtreewidgetitem.setText(2, QCoreApplication.translate("MainWidget", u"Source Path", None));
         ___qtreewidgetitem.setText(1, QCoreApplication.translate("MainWidget", u"Raw Filename", None));
         ___qtreewidgetitem.setText(0, QCoreApplication.translate("MainWidget", u"Cleaned Filename", None));
         self.general_sim_slider_label.setText(QCoreApplication.translate("MainWidget", u"Similarity Grouping Threshold", None))

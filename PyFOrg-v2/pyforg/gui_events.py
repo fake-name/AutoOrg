@@ -4,6 +4,7 @@ import traceback
 import pickle
 import os
 import json
+from PySide2.QtWidgets import QMessageBox
 from PySide2.QtWidgets import QFileDialog
 from PySide2.QtWidgets import QWidget
 from PySide2.QtWidgets import QMainWindow
@@ -131,18 +132,18 @@ class PyFOrg(QMainWindow):
 
 	def handler_word_length_weighting_adjusted(self, _event):
 		self.config.word_length_weighting = float(self.gui.slider_word_length_weighting.value())
-		textVal = self.config.word_length_weighting/1000
+		textVal = self.config.word_length_weighting / 1000
 		self.gui.value_word_length_weighting.setText("%0.3f" % textVal)
 
 
 	def handler_str_len_difference_adjusted(self, _event):
 		self.config.str_length_weighting = float(self.gui.slider_str_length_difference_weighting.value())
-		textVal = self.config.str_length_weighting/1000
+		textVal = self.config.str_length_weighting / 1000
 		self.gui.value_str_length_difference_weighting.setText("%0.3f" % textVal)
 
 	def handler_word_len_difference_weighting_adjusted(self, _event):
 		self.config.word_difference_weighting = float(self.gui.slider_word_length_difference_weighting.value())
-		textVal = self.config.word_difference_weighting/1000
+		textVal = self.config.word_difference_weighting / 1000
 		self.gui.value_word_length_difference_weighting.setText("%0.3f" % textVal)
 
 	def handler_threshold_slider_adjusted(self, _event):
@@ -191,77 +192,87 @@ class PyFOrg(QMainWindow):
 			fp.write(conf)
 
 	def handler_start_dir_processing(self, _event):
-		file_source_dir = self.gui.sort_source_location.text()
+
+		self.config.strip_str   = self.gui.filename_cleaner_text_ctrl.text()
+		self.config.sort_from_dir  = self.gui.sort_source_location.text()
+		self.config.sort_to_dir = self.gui.sort_into_dir.text()
+
 		terms = self.gui.filename_cleaner_text_ctrl.text().split(":")
 		terms = [tmp for tmp in terms if tmp]
 		self.config.strip_terms = terms
 
-		if os.access(file_source_dir, os.F_OK):
-			self.compar = file_comparator.Comparator(self.config)
-			self.compar.comp(file_source_dir)
+		if self.config.enable_sort_to_dir and not os.access(self.config.sort_to_dir, os.F_OK):
+			msg_box = QMessageBox()
+			msg_box.setText("Cannot Access Path %s" % self.config.sort_to_dir)
+			msg_box.exec_()
+			return
 
-			trimmed_dict = self.compar.trimTree(self.config.getCompThresh())
+		if not os.access(self.config.sort_from_dir, os.F_OK):
+			msg_box = QMessageBox()
+			msg_box.setText("Cannot Access Path %s" % self.config.sort_from_dir)
+			msg_box.exec_()
+			return
 
-			#print trimmed_dict
-			if len(trimmed_dict) < 1:
-				print("No items. Either folder is empty or thresholds are set incorrectly.")
-			self.add_dict_to_tree(trimmed_dict)
+
+		self.compar = file_comparator.Comparator(self.config)
+
+		if self.config.enable_sort_to_dir:
+			self.compar.sort_into(self.config.sort_from_dir, self.config.sort_to_dir)
 		else:
-			print("Cannot Access Path %s" % file_source_dir)
+			self.compar.sort(self.config.sort_from_dir)
+
+		trimmed_dict = self.compar.trimTree(self.config.getCompThresh())
+
+		#print trimmed_dict
+		if len(trimmed_dict) < 1:
+			print("No items. Either folder is empty or thresholds are set incorrectly.")
+		self.add_dict_to_tree(trimmed_dict)
+
 
 	def add_dict_to_tree(self, filesList):
-
 		self.gui.file_tree.clear()
-		fnLen = 0
-		cnLen = 0
-		for group in filesList:
-			for itemdict, simVal in group.items():
-				tLen_1 = len(itemdict.fn)
-				if tLen_1 > fnLen:
-					fnLen = tLen_1
-				tLen_2 = len(itemdict.cn)
-				if tLen_2 > cnLen:
-					cnLen = tLen_2
 
 		for group in filesList:
 			parent = QTreeWidgetItem(self.gui.file_tree)
-			parent.setText(0, "{}".format(list(group.keys())[0].cn.title()))
+
 			parent.setFlags(parent.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
 
-			fnLen = 0
-			cnLen = 0
-			for itemdict, simVal in group.items():
-				tLen_1 = len(itemdict.fn)
-				if tLen_1 > fnLen:
-					fnLen = tLen_1
-				tLen_2 = len(itemdict.cn)
-				if tLen_2 > cnLen:
-					cnLen = tLen_2
+			source_item = None
+			for item_object, simVal in group.items():
 
-			for itemdict, simVal in list(group.items()):
+				if simVal == "Source":
+					parent.setText(0, "{}".format(item_object.fn))
+					parent.setText(3, "{}".format(item_object.src_fqpath))
+					source_item = item_object
+
+			assert source_item is not None
+			for item_object, simVal in group.items():
+
+				if simVal == "Source":
+					continue
+
+
 				branch = QTreeWidgetItem(parent)
 				branch.setFlags(branch.flags() | Qt.ItemIsUserCheckable)
 
-				branch.setText(0, itemdict.cn.ljust(cnLen+1))
-				branch.setText(1, itemdict.fn.ljust(fnLen+1))
-				branch.setText(2, "%s" % (simVal, ))
+				branch.setText(0, item_object.cn)
+				branch.setText(1, item_object.fn)
+				branch.setText(2, "%s" % (item_object.src_fqpath, ))
+				branch.setText(3, "%s" % (item_object.dest_fqpath, ))
+				if isinstance(simVal, (int, float)):
+					branch.setText(4, "%0.5f" % (simVal, ))
+				else:
+					branch.setText(4, "%s" % (simVal, ))
 				branch.setCheckState(0, Qt.Unchecked)
-				branch.item_data = itemdict
+				branch.item_data = item_object
 
 
-				# self.fileTree.AppendItem(thisBranch, "Cleaned String - : %s : - Original String - : %s  : - Similarity Metric Value: %s" %
-				# 		(
-				# 			itemdict.cn.ljust(cnLen+1),
-				# 			itemdict.fn.ljust(fnLen+1),
-				# 			simVal
-				# 		),
-				# 	ct_type=1, data=itemdict)
-				#print self.fileTree.SetPyData(leafID, (itemdict, simVal))
-				#print "	", itemdict.fn
 
-		self.gui.file_tree.setColumnWidth(0, 800)
-		self.gui.file_tree.setColumnWidth(1, 800)
+		self.gui.file_tree.setColumnWidth(0, 400)
+		self.gui.file_tree.setColumnWidth(1, 400)
 		self.gui.file_tree.setColumnWidth(2, 100)
+		self.gui.file_tree.setColumnWidth(3, 100)
+		self.gui.file_tree.setColumnWidth(4, 100)
 
 
 	def handler_check_items_with_threshold(self, _event):

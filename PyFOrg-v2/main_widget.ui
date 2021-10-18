@@ -98,7 +98,7 @@
           <bool>true</bool>
          </property>
          <property name="columnCount">
-          <number>3</number>
+          <number>5</number>
          </property>
          <attribute name="headerMinimumSectionSize">
           <number>100</number>
@@ -111,6 +111,16 @@
          <column>
           <property name="text">
            <string>Raw Filename</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Source Path</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Destination Path</string>
           </property>
          </column>
          <column>

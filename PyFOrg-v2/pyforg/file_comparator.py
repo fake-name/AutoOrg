@@ -24,155 +24,202 @@ from . import config
 
 
 class Comparator():
-	def __init__(self, compConf = None):
+	def __init__(self, comp_conf = None):
 
-		if compConf is None:
-			compConf = config.ConfigObj()
+		if comp_conf is None:
+			comp_conf = config.ConfigObj()
 
-		self.file_set = set()
-		self.mapMatrice = None
+		self.sort_into_set = set()
+		self.sort_from_set = set()
+		self.map_matrice = None
 
-		self.compConf = compConf
+		self.comp_conf = comp_conf
 
-	def load_files(self, target_dir):
-		# print("Getting File List...")
+	def load_files(self, target_dir, files=False, dirs=False):
+
+		assert files or dirs
+		assert not(files and dirs)
+
+		print("Getting File List...")
 
 		dirCont = []
 		if not os.access(target_dir, os.W_OK):
 			print("cannot access Directory")
-			return 0
+			return None
 
 		dirCont = os.listdir(target_dir)
 
 		if not dirCont:
 			print("No files in target Directory!")
-			return 0
+			return None
+
 
 		#Import list of file names, and push them into a dictionary
-		# print("Number of Files = %s" % len(dirCont))
+		print("Number of Files = %s" % len(dirCont))
 		# print("Scrubbing File Names of Dirs")
 		file_id = 0
-		self.file_set = set()
+		file_set = set()
 		for item in dirCont:
-			if os.path.isfile(os.path.join(target_dir, item)):
-				file = filename_container.Filename(
-						filename = item,
-						config   = self.compConf,
-						id_num   = file_id,
+			item_fqp = os.path.join(target_dir, item)
+			if (
+					(files and os.path.isfile(item_fqp))
+					or
+					(dirs and os.path.isdir(item_fqp))
+					):
+				file_obj = filename_container.Filename(
+						filename       = item,
+						config         = self.comp_conf,
+						id_num         = file_id,
+						containing_dir = target_dir
 					)
-				self.file_set.add(file)
+				file_set.add(file_obj)
 				if file_id % 250 == 0:
 					print("File %s of %s" % (file_id, len(dirCont)))
 				file_id += 1
 
-		return len(self.file_set)
+		return file_set
 
-	def comp(self, targetDir):
+	def sort_into(self, sort_from, sort_into):
+		'''
+		trimTree() sorts into the names in file_set,
+		so we load the sort_into dir into that so it
+		works without needing more custom logic.
 
-		num_files = self.load_files(targetDir)
+		'''
+
+		self.sort_into_set = self.load_files(sort_into, dirs=True)
+		sort_into_count = len(self.sort_into_set)
+		if not sort_into_count:
+			print("No input files?", sort_into, self.sort_into_set)
+			print(os.listdir(sort_into))
+			return
+
+		self.sort_from_set = self.load_files(sort_from, files=True)
+		sort_from_cnt = len(self.sort_from_set)
+		if not sort_from_cnt:
+			print("No output files?")
+			return
+
+		self.map_matrice = comutative_matrix.NonComutativeMatrix(
+			matrix_x=sort_into_count,
+			matrix_y=sort_from_cnt
+			)
+
+
+		for sort_into_dir in self.sort_into_set:
+			for sort_from_file in self.sort_from_set:
+				similarity = sort_into_dir.comp(sort_from_file)
+				self.map_matrice.set(x=sort_into_dir.id_num, y=sort_from_file.id_num, val=similarity)
+
+
+	def sort(self, target_dir):
+		self.sort_into_set = self.load_files(target_dir, files=True)
+		num_files = len(self.sort_into_set)
 		if not num_files:
 			return
 
-		self.mapMatrice = comutative_matrix.ComutativeMatrix(num_files)
-		for idx, targetFile in enumerate(self.file_set):
+		self.map_matrice = comutative_matrix.ComutativeMatrix(num_files)
+		for target_file in self.sort_into_set:
 
-			for compFile in self.file_set:
+			for comp_file in self.sort_into_set:
 				if (
-						targetFile != compFile
+						target_file != comp_file
 					and
-						targetFile.id_num >= compFile.id_num
+						target_file.id_num >= comp_file.id_num
 					):
-					self.mapMatrice[compFile.id_num, targetFile.id_num] = targetFile.comp(compFile)
+					self.map_matrice.set(comp_file.id_num, target_file.id_num, target_file.comp(comp_file))
 
-			#Print **more** for lots of files, because each step takes longer
-			#This makes progress more visible
-			if num_files < 1000:
-				modu = 25
-			elif num_files < 5000:
-				modu = 10
-			else:
-				modu = 1
-
-			if idx % modu == 0:
-				print("Step:", idx, end=' ')
-				print(" - Remaning steps:", num_files - idx)
-
-		#print self.mapMatrice
-
-		#mx = self.mapMatrice.m
-		#print mx[:]
-
-	def trimTree(self, compThresh = 1.5):
+	def trim_into(self, compThresh):
 
 		compThresh = float(compThresh)
 
-		item_id_dict = {}
+		sort_into_item_id_dict = {}
+		for value in self.sort_into_set:
+			sort_into_item_id_dict[value.id_num] = value
 
-		for value in self.file_set:
-			item_id_dict[value.id_num] = value
-
-		# import pdb
-		# pdb.set_trace()
+		sort_from_item_id_dict = {}
+		for value in self.sort_from_set:
+			sort_from_item_id_dict[value.id_num] = value
 
 		fileGroups = []
 
-		while item_id_dict:
-			key, value = item_id_dict.popitem()
+		while sort_into_item_id_dict:
+			key, item = sort_into_item_id_dict.popitem()
 
-			sims = self.mapMatrice.retItems(key, compThresh)
-			if sims:
-				tempDict = {}
-				for subkey, subval in list(sims.items()):
-					for other_key, other in list(item_id_dict.items()):
-						if subkey == other.id_num:
-							item = item_id_dict[subkey]
-							tempDict[item] = subval
-							if subkey in item_id_dict:
-								del item_id_dict[subkey]
+			similar_items = self.map_matrice.get_items_greater_then(key, compThresh)
+			if similar_items:
+				temp_dict = {}
+				for sort_from_key, similarity in similar_items.items():
+					match = sort_from_item_id_dict[sort_from_key]
+					match.set_dest_path(item.src_fqpath)
+					temp_dict[match] = similarity
 
-				tempDict[value] = "Original"
+				temp_dict[item] = "Source"
 
-				if len(tempDict) > 1:
-					fileGroups.append(tempDict)
+				if len(temp_dict) > 1:
+					fileGroups.append(temp_dict)
 
 				# raise RuntimeError
 
 		return fileGroups
 
+
+	def trim_single(self, compThresh):
+
+		compThresh = float(compThresh)
+
+		item_id_dict = {}
+		for value in self.sort_into_set:
+			item_id_dict[value.id_num] = value
+
+		fileGroups = []
+
+		while item_id_dict:
+			key, item = item_id_dict.popitem()
+
+			sims = self.map_matrice.get_items_greater_then(key, compThresh)
+			if sims:
+				temp_dict = {}
+
+
+				dest  = filename_container.Filename(
+						filename       = item.cn.title(),
+						config         = self.comp_conf,
+						id_num         = -1,
+						containing_dir = item.src_path,
+					)
+
+				temp_dict[dest] = "Source"
+
+				for subkey, subval in sims.items():
+					for other_key, other in list(item_id_dict.items()):
+						if subkey == other.id_num:
+							item = item_id_dict[subkey]
+							item.set_dest_path(dest.src_fqpath)
+							temp_dict[item] = subval
+							if subkey in item_id_dict:
+								del item_id_dict[subkey]
+
+				temp_dict[item] = "Original"
+
+
+
+				if len(temp_dict) > 2:
+					fileGroups.append(temp_dict)
+
+				# raise RuntimeError
+
+		return fileGroups
+
+	def trimTree(self, compThresh):
+		if self.comp_conf.enable_sort_to_dir:
+			return self.trim_into(compThresh)
+		else:
+			return self.trim_single(compThresh)
+
+
 	def close(self):
 		#gc seems to fail to catch the exit, resulting in lots of temp files everywhere
-		self.mapMatrice.close()
+		self.map_matrice.close()
 
-class Test():
-	def __init__(self):
-		self.obj = Comparator()
-
-	def go(self):
-		return self.obj.comp(r"N:\IRC")#\uns2")
-
-
-if __name__ == "__main__":
-	sLen = len(sys.argv)
-	if sLen > 1:
-		if sys.argv[1] == "-t":
-			s = """\
-from __main__ import *
-tester = Test()
-			"""
-			tmr = timeit.Timer("tester.go()", s)
-			print(tmr)
-			execs = 3
-			print("%.10f sec/pass" % (tmr.timeit(number=execs) / execs))
-
-		if sys.argv[1] == "-p":
-			import cProfile
-			import pstats
-
-			tester = Test()
-			cProfile.run("tester.go()", 'fooprof')
-
-			p = pstats.Stats('fooprof')
-			p.strip_dirs().sort_stats('cumulative').print_stats()
-
-	sys.exit(0)
 
