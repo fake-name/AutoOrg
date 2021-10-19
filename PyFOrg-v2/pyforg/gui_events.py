@@ -16,6 +16,12 @@ from . import gui_gen
 from . import config
 from . import file_comparator
 
+CLEANED_NAME_COLUMN  = 0
+FILE_NAME_COLUMN     = 1
+SOURCE_FQPATH_COLUMN = 2
+DEST_FQPATH_COLUMN   = 3
+SIMILARITY_COLUMN    = 4
+
 class PyFOrg(QMainWindow):
 	def __init__(self):
 		QMainWindow.__init__(self)
@@ -229,52 +235,6 @@ class PyFOrg(QMainWindow):
 		self.add_dict_to_tree(trimmed_dict)
 
 
-	def add_dict_to_tree(self, filesList):
-		self.gui.file_tree.clear()
-
-		for group in filesList:
-			parent = QTreeWidgetItem(self.gui.file_tree)
-
-			parent.setFlags(parent.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
-
-			source_item = None
-			for item_object, simVal in group.items():
-
-				if simVal == "Source":
-					parent.setText(0, "{}".format(item_object.fn))
-					parent.setText(3, "{}".format(item_object.src_fqpath))
-					source_item = item_object
-
-			assert source_item is not None
-			for item_object, simVal in group.items():
-
-				if simVal == "Source":
-					continue
-
-
-				branch = QTreeWidgetItem(parent)
-				branch.setFlags(branch.flags() | Qt.ItemIsUserCheckable)
-
-				branch.setText(0, item_object.cn)
-				branch.setText(1, item_object.fn)
-				branch.setText(2, "%s" % (item_object.src_fqpath, ))
-				branch.setText(3, "%s" % (item_object.dest_fqpath, ))
-				if isinstance(simVal, (int, float)):
-					branch.setText(4, "%0.5f" % (simVal, ))
-				else:
-					branch.setText(4, "%s" % (simVal, ))
-				branch.setCheckState(0, Qt.Unchecked)
-				branch.item_data = item_object
-
-
-
-		self.gui.file_tree.setColumnWidth(0, 400)
-		self.gui.file_tree.setColumnWidth(1, 400)
-		self.gui.file_tree.setColumnWidth(2, 100)
-		self.gui.file_tree.setColumnWidth(3, 100)
-		self.gui.file_tree.setColumnWidth(4, 100)
-
-
 	def handler_check_items_with_threshold(self, _event):
 		slider_val = self.gui.slider_num_file_for_checking.value()
 
@@ -343,8 +303,54 @@ class PyFOrg(QMainWindow):
 	# ----------------------------------------------
 	# To Update
 
+	def add_dict_to_tree(self, filesList):
+		self.gui.file_tree.clear()
+
+		for group in filesList:
+			parent = QTreeWidgetItem(self.gui.file_tree)
+
+			parent.setFlags(parent.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
+
+			source_item = None
+			for item_object, simVal in group.items():
+
+				if simVal == "Source":
+					parent.setText(0, "{}".format(item_object.fn))
+					parent.setText(3, "{}".format(item_object.src_fqpath))
+					source_item = item_object
+
+			assert source_item is not None
+			for item_object, simVal in group.items():
+
+				if simVal == "Source":
+					continue
+
+
+				branch = QTreeWidgetItem(parent)
+				branch.setFlags(branch.flags() | Qt.ItemIsUserCheckable)
+
+				branch.setText(CLEANED_NAME_COLUMN,  item_object.cn)
+				branch.setText(FILE_NAME_COLUMN,     item_object.fn)
+				branch.setText(SOURCE_FQPATH_COLUMN, "%s" % (item_object.src_fqpath, ))
+				branch.setText(DEST_FQPATH_COLUMN,   "%s" % (item_object.dest_fqpath, ))
+				if isinstance(simVal, (int, float)):
+					branch.setText(SIMILARITY_COLUMN, "%0.5f" % (simVal, ))
+				else:
+					branch.setText(SIMILARITY_COLUMN, "%s" % (simVal, ))
+				branch.setCheckState(0, Qt.Unchecked)
+				branch.item_data = item_object
+
+
+
+		self.gui.file_tree.setColumnWidth(CLEANED_NAME_COLUMN,  400)
+		self.gui.file_tree.setColumnWidth(FILE_NAME_COLUMN,     400)
+		self.gui.file_tree.setColumnWidth(SOURCE_FQPATH_COLUMN, 100)
+		self.gui.file_tree.setColumnWidth(DEST_FQPATH_COLUMN,   100)
+		self.gui.file_tree.setColumnWidth(SIMILARITY_COLUMN,    100)
+
 
 	def handler_move_selected_items_into_new_folders(self, _event):
+		print("handler_move_selected_items_into_new_folders")
 		file_source_dir = self.gui.sort_source_location.text()
 
 		if self.config.enable_sort_to_dir:
@@ -355,8 +361,10 @@ class PyFOrg(QMainWindow):
 				)
 
 		if not output_folder:
+			print("No output folder!")
 			return
 
+		print("Item count:", self.gui.file_tree.topLevelItemCount())
 
 		for root_idx in range(self.gui.file_tree.topLevelItemCount()):
 			item = self.gui.file_tree.topLevelItem(root_idx)
@@ -365,26 +373,34 @@ class PyFOrg(QMainWindow):
 			checked = item.checkState(0)
 
 			if checked in [Qt.Checked, Qt.PartiallyChecked]:
-				# Column 0 is the header column
-				dir_name = item.text(0)
-				item_folder_name = os.path.join(output_folder, dir_name)
-				print("Item output dir: '%s'" % (item_folder_name, ))
-				if not os.access(item_folder_name, os.F_OK):
-					print("need to make dir")
-					# os.mkdir(item_folder_name)
+
+				# Don't create directories if we're in sort-into mode.
+				if not self.config.enable_sort_to_dir:
+					# Column 0 is the header column
+					first_child = item.child(0)
+					item_folder_name = os.path.join(output_folder, first_child.item_data.cleared_name.title())
+					print("Item output dir: '%s'" % (item_folder_name, ))
+
+					if not os.access(item_folder_name, os.F_OK):
+						print("need to make dir")
+						os.mkdir(item_folder_name)
+
+					for child_idx in range(child_cnt):
+						child = item.child(child_idx)
+						child.item_data.set_dest_path(item_folder_name)
+
 
 				for child_idx in range(child_cnt):
 					child = item.child(child_idx)
 					child_checked = child.checkState(0)
 					if child_checked == Qt.Checked:
-						item_fn = child.item_data.fn
-						source_fn = os.path.join(file_source_dir, item_fn)
-						dest_fn = os.path.join(item_folder_name, item_fn)
+						source_fn = child.item_data.src_fqpath
+						dest_fn   = child.item_data.dest_fqpath
 						print("Should move from '%s' to '%s'" % (source_fn, dest_fn))
 						if os.access(dest_fn, os.F_OK):
 							print("destination file already exists!")
 						elif os.access(source_fn, os.F_OK):
 							print("Move would be OK?")
+							shutil.move(source_fn, dest_fn)
 						else:
 							print("what? Cannot access source?")
-							# shutil.move(originalFullPath, destFullPath)

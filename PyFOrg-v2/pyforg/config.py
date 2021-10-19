@@ -18,6 +18,8 @@ class ConfigObj(object):
 		self.parentheses               = True
 		self.curly_braces              = True
 
+		self.duplicate_segments       = True
+
 		self.mapping_dict              = {}
 		self.sort_from_dir             = "~/"
 		self.sort_to_dir               = ""
@@ -29,21 +31,22 @@ class ConfigObj(object):
 
 	def dump(self):
 		config = {}
-		config["enable_sort_to_dir"]       = self.enable_sort_to_dir
-		config["sort_to_dir"]              = self.sort_to_dir
-		config["sort_from_dir"]               = self.sort_from_dir
+		config["enable_sort_to_dir"]        = self.enable_sort_to_dir
+		config["sort_to_dir"]               = self.sort_to_dir
+		config["sort_from_dir"]             = self.sort_from_dir
 		config["comp_threshold"]            = self.comp_threshold
 
-		config["word_length_weighting"]      = self.word_length_weighting
-		config["str_length_weighting"]       = self.str_length_weighting
-		config["word_difference_weighting"]  = self.word_difference_weighting
+		config["word_length_weighting"]     = self.word_length_weighting
+		config["str_length_weighting"]      = self.str_length_weighting
+		config["word_difference_weighting"] = self.word_difference_weighting
 
 		config["strip_terms"]               = self.strip_terms
 		config["strip_str"]                 = self.strip_str
 
-		config["brackets"]                 = self.brackets
-		config["parentheses"]              = self.parentheses
+		config["brackets"]                  = self.brackets
+		config["parentheses"]               = self.parentheses
 		config["curly_braces"]              = self.curly_braces
+		config["duplicate_segments"]        = self.duplicate_segments
 
 		return config
 
@@ -51,7 +54,7 @@ class ConfigObj(object):
 
 		self.enable_sort_to_dir         = config["enable_sort_to_dir"]
 		self.sort_to_dir                = config["sort_to_dir"]
-		self.sort_from_dir                 = config["sort_from_dir"]
+		self.sort_from_dir              = config["sort_from_dir"]
 		self.comp_threshold             = config["comp_threshold"]
 		self.word_length_weighting      = config["word_length_weighting"]
 		self.str_length_weighting       = config["str_length_weighting"]
@@ -63,6 +66,7 @@ class ConfigObj(object):
 		self.brackets                   = config["brackets"]
 		self.parentheses                = config["parentheses"]
 		self.curly_braces               = config["curly_braces"]
+		self.duplicate_segments         = config["duplicate_segments"]
 
 		return
 
@@ -82,6 +86,7 @@ class ConfigObj(object):
 			'sort_from_dir',
 			'sort_to_dir',
 			'enable_sort_to_dir',
+			'duplicate_segments',
 		]
 		assert key in ok_keys, "Trying to set invalid key '%s'" % key
 

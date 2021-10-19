@@ -4,11 +4,9 @@ import re
 import os.path
 import math
 import Levenshtein as Lv
-import timeit
 import numpy as np
 
 
-import h5py
 
 
 
@@ -66,10 +64,7 @@ class Filename():
 	gid = None
 
 	def __init__(self, filename, config, id_num, containing_dir):
-
-		print("Comparing:", filename)
 		self.similarity_cache = None
-
 		self.__id_no = id_num
 
 		#print "PreClean", filename
@@ -83,13 +78,14 @@ class Filename():
 
 		#print "PostClean", temp_cleaned
 		temp_cleaned = re.sub("'", "", temp_cleaned)
+		temp_cleaned = re.sub("’", "", temp_cleaned)
 		#remove punctuation cleanly (')apostrophes
 
-		temp_cleaned = re.sub(r"\.rar|\.zip|\.cbr|\.cbz|\.7z|\.jpg|\.png", " ", temp_cleaned, re.IGNORECASE)	#remove known file suffixes
+		temp_cleaned = re.sub(r"\.rar|\.zip|\.cbr|\.cbz|\.7z|\.jpg|\.png|\.epub", " ", temp_cleaned, re.IGNORECASE)	#remove known file suffixes
 		temp_cleaned = re.sub(r"([\[\]_\+0-9()=!,])", " ", temp_cleaned)				#clean brackets, symbols, and numbers: Removed "-"
 		temp_cleaned = re.sub(r"\W(ch|vol)[0-9]+?", " ", temp_cleaned)				#Clean 'ch01' or similar
 		temp_cleaned = re.sub(r"\W[vc][0-9]*?\W", " ", temp_cleaned)				#Clean 'v01' and 'c01' or similar
-		temp_cleaned = re.sub(r"\W[a-zA-z0-9]\W", " ", temp_cleaned)				#Remove all single letters
+		# temp_cleaned = re.sub(r"\W[a-zA-z0-9]\W", " ", temp_cleaned)				#Remove all single letters
 
 		for term in [t for t in config.strip_terms if t]:
 			tempRE = re.compile(term, re.IGNORECASE)
@@ -98,10 +94,27 @@ class Filename():
 		temp_cleaned = re.sub(r"\.", " ", temp_cleaned).lower()					#Remove dots
 		temp_cleaned = re.sub(r" +", " ", temp_cleaned).rstrip().lstrip()				#reduce all repeated spaces to one space
 
+
+		# I have had issues where a filename gets duplicated: 'thing xxx.epub - thing xxx.epub'. This cleans that up
+		if config.duplicate_segments:
+			splitf = temp_cleaned.split()
+			if len(splitf) % 2 == 0:
+				hlen = len(splitf) // 2
+				if splitf[:hlen] == splitf[hlen:]:
+					temp_cleaned = " ".join(splitf[:hlen])
+
 		self.fn = filename
 		self.cn = temp_cleaned
 		self.__src_path = containing_dir
 		self.__dest_path = None
+
+	@property
+	def filename(self):
+		return self.fn
+
+	@property
+	def cleared_name(self):
+		return self.cn
 
 	@property
 	def src_path(self):
@@ -109,7 +122,9 @@ class Filename():
 
 	@property
 	def dest_path(self):
-		return os.path.normpath(self.__dest_path)
+		if self.__dest_path:
+			return os.path.normpath(self.__dest_path)
+		return None
 
 	@property
 	def src_fqpath(self):
@@ -117,7 +132,9 @@ class Filename():
 
 	@property
 	def dest_fqpath(self):
-		return os.path.normpath(os.path.join(self.__dest_path, self.fn))
+		if self.__dest_path:
+			return os.path.normpath(os.path.join(self.__dest_path, self.fn))
+		return None
 
 	@property
 	def id_num(self):
@@ -142,6 +159,16 @@ class Filename():
 		#compConf.mapMatrice[other_file.id_num, self.id_num] = comp_value
 
 	def set_dest_path(self, fpath):
-		print("Set dest path:", fpath)
 		self.__dest_path = fpath
+
+def test():
+	from . import config
+	c = config.ConfigObj()
+	f = Filename(filename="Bofuri - I Don’t Want to Get Hurt, so I’ll Max Out My Defense. - LN 01.epub", config=c, id_num=2, containing_dir="/home/place/wat")
+
+	print(f)
+	print("Cleaned name: '%s'" % (f.cn, ))
+
+if __name__ == '__main__':
+	test()
 

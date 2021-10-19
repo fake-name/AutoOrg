@@ -195,7 +195,6 @@ class Comparator():
 					for other_key, other in list(item_id_dict.items()):
 						if subkey == other.id_num:
 							item = item_id_dict[subkey]
-							item.set_dest_path(dest.src_fqpath)
 							temp_dict[item] = subval
 							if subkey in item_id_dict:
 								del item_id_dict[subkey]
