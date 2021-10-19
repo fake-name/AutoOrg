@@ -31,7 +31,6 @@ class NonComutativeMatrix(object):
 		cells = self.matrix_x * self.matrix_y
 
 		if cells > 250_000_000:
-			print()
 			self.mmapped = True
 			self.tempF = tempfile.mkstemp()
 			self.f = h5py.File(self.tempF[1], 'w')
@@ -63,7 +62,7 @@ class NonComutativeMatrix(object):
 		matrix_sz = len(xRang)
 		for idx in range(matrix_sz):
 			sim = xRang[idx]
-			if sim > thresh and idx != key_x:
+			if sim > thresh:
 				out[idx] = sim
 
 		return out
@@ -142,7 +141,7 @@ class ComutativeMatrix(object):
 		yRang = self.m[key,...]
 		for idx in range(self.matrix_sz):
 			sim = xRang[idx] if xRang[idx] > yRang[key] else yRang[key]
-			if sim > thresh and idx != key:
+			if sim > thresh:
 				out[idx] = sim
 		return out
 

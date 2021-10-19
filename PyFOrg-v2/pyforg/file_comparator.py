@@ -1,18 +1,11 @@
-import os.path
 # To change this template, choose Tools | Templates
 # and open the template in the editor.
-import sys
 import os
-import re
-import math
+import os.path
 import Levenshtein as Lv
-import timeit
 import numpy as np
-import tempfile
 
-import wx
 
-import h5py
 from . import comutative_matrix
 from . import filename_container
 from . import config
@@ -176,8 +169,8 @@ class Comparator():
 
 		while item_id_dict:
 			key, item = item_id_dict.popitem()
-
 			sims = self.map_matrice.get_items_greater_then(key, compThresh)
+
 			if sims:
 				temp_dict = {}
 
@@ -191,16 +184,15 @@ class Comparator():
 
 				temp_dict[dest] = "Source"
 
-				for subkey, subval in sims.items():
+				for subkey, similarity in sims.items():
 					for other_key, other in list(item_id_dict.items()):
 						if subkey == other.id_num:
-							item = item_id_dict[subkey]
-							temp_dict[item] = subval
+							assert other_key == subkey
+							temp_dict[other] = similarity
 							if subkey in item_id_dict:
 								del item_id_dict[subkey]
 
 				temp_dict[item] = "Original"
-
 
 
 				if len(temp_dict) > 2:
