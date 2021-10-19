@@ -33,23 +33,19 @@ class Comparator():
 		assert files or dirs
 		assert not(files and dirs)
 
-		print("Getting File List...")
+		print("Getting File List of %s" % target_dir)
 
 		dirCont = []
 		if not os.access(target_dir, os.W_OK):
 			print("cannot access Directory")
-			return None
+			return set()
 
 		dirCont = os.listdir(target_dir)
 
 		if not dirCont:
 			print("No files in target Directory!")
-			return None
+			return set()
 
-
-		#Import list of file names, and push them into a dictionary
-		print("Number of Files = %s" % len(dirCont))
-		# print("Scrubbing File Names of Dirs")
 		file_id = 0
 		file_set = set()
 		for item in dirCont:
@@ -66,8 +62,6 @@ class Comparator():
 						containing_dir = target_dir
 					)
 				file_set.add(file_obj)
-				if file_id % 250 == 0:
-					print("File %s of %s" % (file_id, len(dirCont)))
 				file_id += 1
 
 		return file_set
@@ -77,7 +71,6 @@ class Comparator():
 		trimTree() sorts into the names in file_set,
 		so we load the sort_into dir into that so it
 		works without needing more custom logic.
-
 		'''
 
 		self.sort_into_set = self.load_files(sort_into, dirs=True)
@@ -88,6 +81,10 @@ class Comparator():
 			return
 
 		self.sort_from_set = self.load_files(sort_from, files=True)
+		if not self.sort_from_set:
+			print("No output files?")
+			return
+
 		sort_from_cnt = len(self.sort_from_set)
 		if not sort_from_cnt:
 			print("No output files?")
@@ -123,6 +120,8 @@ class Comparator():
 					self.map_matrice.set(comp_file.id_num, target_file.id_num, target_file.comp(comp_file))
 
 	def trim_into(self, compThresh):
+		if not self.map_matrice:
+			return []
 
 		compThresh = float(compThresh)
 
@@ -158,6 +157,8 @@ class Comparator():
 
 
 	def trim_single(self, compThresh):
+		if not self.map_matrice:
+			return []
 
 		compThresh = float(compThresh)
 

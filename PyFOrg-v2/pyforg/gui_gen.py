@@ -226,35 +226,41 @@ class Ui_MainWidget(object):
 
         self.verticalLayout_3.addItem(self.verticalSpacer_3)
 
-        self.settings_tab_strip_checkboxes_sizer = QHBoxLayout()
-        self.settings_tab_strip_checkboxes_sizer.setObjectName(u"settings_tab_strip_checkboxes_sizer")
-        self.settings_tab_strip_checkboxes_sizer.setSizeConstraint(QLayout.SetDefaultConstraint)
+        self.verticalLayout_4 = QVBoxLayout()
+        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.config_tab_filename_cleaner_bracket_remval_static_text = QLabel(self.settings_tab)
         self.config_tab_filename_cleaner_bracket_remval_static_text.setObjectName(u"config_tab_filename_cleaner_bracket_remval_static_text")
+        self.config_tab_filename_cleaner_bracket_remval_static_text.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignTop)
 
-        self.settings_tab_strip_checkboxes_sizer.addWidget(self.config_tab_filename_cleaner_bracket_remval_static_text)
+        self.verticalLayout_4.addWidget(self.config_tab_filename_cleaner_bracket_remval_static_text)
 
         self.text_clean_parentheses_checkbox = QCheckBox(self.settings_tab)
         self.text_clean_parentheses_checkbox.setObjectName(u"text_clean_parentheses_checkbox")
 
-        self.settings_tab_strip_checkboxes_sizer.addWidget(self.text_clean_parentheses_checkbox)
+        self.verticalLayout_4.addWidget(self.text_clean_parentheses_checkbox)
 
         self.text_clean_brackets_checkbox = QCheckBox(self.settings_tab)
         self.text_clean_brackets_checkbox.setObjectName(u"text_clean_brackets_checkbox")
 
-        self.settings_tab_strip_checkboxes_sizer.addWidget(self.text_clean_brackets_checkbox)
+        self.verticalLayout_4.addWidget(self.text_clean_brackets_checkbox)
 
         self.text_clean_curly_brackets_checkbox = QCheckBox(self.settings_tab)
         self.text_clean_curly_brackets_checkbox.setObjectName(u"text_clean_curly_brackets_checkbox")
 
-        self.settings_tab_strip_checkboxes_sizer.addWidget(self.text_clean_curly_brackets_checkbox)
+        self.verticalLayout_4.addWidget(self.text_clean_curly_brackets_checkbox)
 
-        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.repeated_filename_checkbox = QCheckBox(self.settings_tab)
+        self.repeated_filename_checkbox.setObjectName(u"repeated_filename_checkbox")
 
-        self.settings_tab_strip_checkboxes_sizer.addItem(self.horizontalSpacer)
+        self.verticalLayout_4.addWidget(self.repeated_filename_checkbox)
+
+        self.strip_extensions_checkbox = QCheckBox(self.settings_tab)
+        self.strip_extensions_checkbox.setObjectName(u"strip_extensions_checkbox")
+
+        self.verticalLayout_4.addWidget(self.strip_extensions_checkbox)
 
 
-        self.verticalLayout_3.addLayout(self.settings_tab_strip_checkboxes_sizer)
+        self.verticalLayout_3.addLayout(self.verticalLayout_4)
 
         self.verticalSpacer_2 = QSpacerItem(10, 10, QSizePolicy.Minimum, QSizePolicy.Fixed)
 
@@ -393,10 +399,12 @@ class Ui_MainWidget(object):
         self.config_tab_filename_cleaner_heading_static_text.setText(QCoreApplication.translate("MainWidget", u"Text Strip List", None))
         self.strip_list_doc_label.setText(QCoreApplication.translate("MainWidget", u"Colon (:) separated list of terms to remove from filenames before comparing. Case insensitive.\n"
 "Note: Be certain to not leave any spurious spaces, they may disrupt text removal.", None))
-        self.config_tab_filename_cleaner_bracket_remval_static_text.setText(QCoreApplication.translate("MainWidget", u"Strip out text in:", None))
-        self.text_clean_parentheses_checkbox.setText(QCoreApplication.translate("MainWidget", u"Parentheses - ()", None))
-        self.text_clean_brackets_checkbox.setText(QCoreApplication.translate("MainWidget", u"Square Brackets - []", None))
-        self.text_clean_curly_brackets_checkbox.setText(QCoreApplication.translate("MainWidget", u"Curly Braces - {}", None))
+        self.config_tab_filename_cleaner_bracket_remval_static_text.setText(QCoreApplication.translate("MainWidget", u"Clean:", None))
+        self.text_clean_parentheses_checkbox.setText(QCoreApplication.translate("MainWidget", u"Text in Parentheses - ()", None))
+        self.text_clean_brackets_checkbox.setText(QCoreApplication.translate("MainWidget", u"Text in Square Brackets - []", None))
+        self.text_clean_curly_brackets_checkbox.setText(QCoreApplication.translate("MainWidget", u"Text in Curly Braces - {}", None))
+        self.repeated_filename_checkbox.setText(QCoreApplication.translate("MainWidget", u"Repeated Filenames", None))
+        self.strip_extensions_checkbox.setText(QCoreApplication.translate("MainWidget", u"Filename Extensions", None))
         self.confing_tab_comp_engine_label.setText(QCoreApplication.translate("MainWidget", u"Comparison Engine Variables", None))
         self.label_word_length_weighting.setText(QCoreApplication.translate("MainWidget", u"Word Length Weighting", None))
         self.value_word_length_weighting.setText(QCoreApplication.translate("MainWidget", u"1.000", None))

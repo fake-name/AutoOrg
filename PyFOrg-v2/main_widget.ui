@@ -339,50 +339,51 @@ Note: Be certain to not leave any spurious spaces, they may disrupt text removal
         </spacer>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="settings_tab_strip_checkboxes_sizer">
-         <property name="sizeConstraint">
-          <enum>QLayout::SetDefaultConstraint</enum>
-         </property>
+        <layout class="QVBoxLayout" name="verticalLayout_4">
          <item>
           <widget class="QLabel" name="config_tab_filename_cleaner_bracket_remval_static_text">
            <property name="text">
-            <string>Strip out text in:</string>
+            <string>Clean:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QCheckBox" name="text_clean_parentheses_checkbox">
            <property name="text">
-            <string>Parentheses - ()</string>
+            <string>Text in Parentheses - ()</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QCheckBox" name="text_clean_brackets_checkbox">
            <property name="text">
-            <string>Square Brackets - []</string>
+            <string>Text in Square Brackets - []</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QCheckBox" name="text_clean_curly_brackets_checkbox">
            <property name="text">
-            <string>Curly Braces - {}</string>
+            <string>Text in Curly Braces - {}</string>
            </property>
           </widget>
          </item>
          <item>
-          <spacer name="horizontalSpacer">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+          <widget class="QCheckBox" name="repeated_filename_checkbox">
+           <property name="text">
+            <string>Repeated Filenames</string>
            </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="strip_extensions_checkbox">
+           <property name="text">
+            <string>Filename Extensions</string>
            </property>
-          </spacer>
+          </widget>
          </item>
         </layout>
        </item>

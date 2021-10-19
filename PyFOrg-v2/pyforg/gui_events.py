@@ -6,11 +6,13 @@ import os
 import json
 from PySide2.QtWidgets import QMessageBox
 from PySide2.QtWidgets import QFileDialog
+from PySide2.QtWidgets import QLabel
 from PySide2.QtWidgets import QWidget
 from PySide2.QtWidgets import QMainWindow
+from PySide2.QtWidgets import QStatusBar
 from PySide2.QtWidgets import QTreeWidgetItem
 from PySide2.QtWidgets import QTreeWidget
-from PySide2.QtCore import Qt
+from PySide2.QtCore    import Qt
 
 from . import gui_gen
 from . import config
@@ -31,9 +33,22 @@ class PyFOrg(QMainWindow):
 		self.gui = gui_gen.Ui_MainWidget()
 		self.gui.setupUi(main_widget)
 
+		self.setup_status_bar()
+
 		self.setCentralWidget(main_widget)
 		self.load_config()
 		self.bind_signals()
+
+	def setup_status_bar(self):
+
+		self.status_bar = QStatusBar()
+		self.status_label = QLabel(self.status_bar)
+		self.status_bar.addWidget(self.status_label)
+		self.setStatusBar(self.status_bar)
+		self.set_status_text("Idle")
+
+	def set_status_text(self, text):
+		self.status_label.setText(text)
 
 	def load_config(self):
 
@@ -62,6 +77,9 @@ class PyFOrg(QMainWindow):
 		self.gui.text_clean_brackets_checkbox             .setChecked(self.config.brackets)
 		self.gui.text_clean_curly_brackets_checkbox       .setChecked(self.config.curly_braces)
 
+		self.gui.repeated_filename_checkbox               .setChecked(self.config.duplicate_segments)
+		self.gui.strip_extensions_checkbox                .setChecked(self.config.file_extensions)
+
 
 		# Update the labels
 		self.handler_threshold_slider_adjusted(None)
@@ -76,9 +94,15 @@ class PyFOrg(QMainWindow):
 
 		self.gui.slider_num_file_for_checking           .valueChanged.connect(self.handler_check_slider_changed)
 
-		self.gui.text_clean_parentheses_checkbox   .stateChanged.connect(self.handler_update_checkboxes_config_evt)
-		self.gui.text_clean_brackets_checkbox      .stateChanged.connect(self.handler_update_checkboxes_config_evt)
-		self.gui.text_clean_curly_brackets_checkbox.stateChanged.connect(self.handler_update_checkboxes_config_evt)
+		self.gui.text_clean_parentheses_checkbox   .stateChanged.connect(self.handler_update_checkboxes_config)
+		self.gui.text_clean_brackets_checkbox      .stateChanged.connect(self.handler_update_checkboxes_config)
+		self.gui.text_clean_curly_brackets_checkbox.stateChanged.connect(self.handler_update_checkboxes_config)
+		self.gui.repeated_filename_checkbox        .stateChanged.connect(self.handler_update_checkboxes_config)
+		self.gui.strip_extensions_checkbox         .stateChanged.connect(self.handler_update_checkboxes_config)
+
+		self.gui.filename_cleaner_text_ctrl.editingFinished.connect(self.handler_text_entry_fields)
+		self.gui.sort_source_location      .editingFinished.connect(self.handler_text_entry_fields)
+		self.gui.sort_into_dir             .editingFinished.connect(self.handler_text_entry_fields)
 
 
 		self.gui.expand_tree                  .clicked.connect(self.handler_expand_tree)
@@ -160,35 +184,38 @@ class PyFOrg(QMainWindow):
 		val = self.gui.slider_num_file_for_checking.value()
 		self.gui.slider_num_file_for_checking_label.setText("%s" % val)
 
-	def handler_update_checkboxes_config_evt(self, _event):
-		self.config.parentheses  = self.gui.text_clean_parentheses_checkbox   .isChecked()
-		self.config.brackets     = self.gui.text_clean_brackets_checkbox      .isChecked()
-		self.config.curly_braces = self.gui.text_clean_curly_brackets_checkbox.isChecked()
+	def handler_update_checkboxes_config(self, _event):
+		self.config.parentheses        = self.gui.text_clean_parentheses_checkbox   .isChecked()
+		self.config.brackets           = self.gui.text_clean_brackets_checkbox      .isChecked()
+		self.config.curly_braces       = self.gui.text_clean_curly_brackets_checkbox.isChecked()
+		self.config.duplicate_segments = self.gui.repeated_filename_checkbox        .isChecked()
+		self.config.file_extensions    = self.gui.strip_extensions_checkbox         .isChecked()
 
 	def handler_threshold_slider_changed(self):
 		try:
 			assert self.compar
-			print("Recomputing similarity tree")
-			print("Trimming Tree")
+			self.set_status_text("Recomputing similarity tree")
 			trimmed_dict = self.compar.trimTree(self.config.getCompThresh())
+			self.set_status_text("Trimming Tree")
 			#print "Adding Tree"
 			#print trimmed_dict
 			self.add_dict_to_tree(trimmed_dict)
 		except:
 			traceback.print_stack()
-			print("Need to run comparison first")
+			self.set_status_text("Need to run comparison first")
 
+	def handler_text_entry_fields(self):
+		self.config.strip_str   = self.gui.filename_cleaner_text_ctrl.text()
+		self.config.sort_from_dir  = self.gui.sort_source_location.text()
+		self.config.sort_to_dir = self.gui.sort_into_dir.text()
 
 	def closeEvent(self, _event):
-		print("Exiting")
+		self.set_status_text("Exiting")
 		try:
 			self.compar.close()
 		except:
 			pass
 
-		self.config.strip_str   = self.gui.filename_cleaner_text_ctrl.text()
-		self.config.sort_from_dir  = self.gui.sort_source_location.text()
-		self.config.sort_to_dir = self.gui.sort_into_dir.text()
 
 		with open("config.json", "w") as fp:
 			conf = json.dumps(
@@ -199,9 +226,6 @@ class PyFOrg(QMainWindow):
 
 	def handler_start_dir_processing(self, _event):
 
-		self.config.strip_str   = self.gui.filename_cleaner_text_ctrl.text()
-		self.config.sort_from_dir  = self.gui.sort_source_location.text()
-		self.config.sort_to_dir = self.gui.sort_into_dir.text()
 
 		terms = self.gui.filename_cleaner_text_ctrl.text().split(":")
 		terms = [tmp for tmp in terms if tmp]
@@ -231,7 +255,7 @@ class PyFOrg(QMainWindow):
 
 		#print trimmed_dict
 		if len(trimmed_dict) < 1:
-			print("No items. Either folder is empty or thresholds are set incorrectly.")
+			self.set_status_text("No items. Either folder is empty or thresholds are set incorrectly.")
 		self.add_dict_to_tree(trimmed_dict)
 
 
@@ -300,9 +324,6 @@ class PyFOrg(QMainWindow):
 			if checked == Qt.Unchecked:
 				item.setExpanded(True)
 
-	# ----------------------------------------------
-	# To Update
-
 	def add_dict_to_tree(self, filesList):
 		self.gui.file_tree.clear()
 
@@ -350,7 +371,6 @@ class PyFOrg(QMainWindow):
 
 
 	def handler_move_selected_items_into_new_folders(self, _event):
-		print("handler_move_selected_items_into_new_folders")
 		file_source_dir = self.gui.sort_source_location.text()
 
 		if self.config.enable_sort_to_dir:
@@ -361,10 +381,12 @@ class PyFOrg(QMainWindow):
 				)
 
 		if not output_folder:
-			print("No output folder!")
+			msg_box = QMessageBox()
+			msg_box.setText("No output folder! How did this happen?")
+			msg_box.exec_()
 			return
 
-		print("Item count:", self.gui.file_tree.topLevelItemCount())
+		self.set_status_text("Item count: %s" % self.gui.file_tree.topLevelItemCount())
 
 		for root_idx in range(self.gui.file_tree.topLevelItemCount()):
 			item = self.gui.file_tree.topLevelItem(root_idx)
@@ -379,10 +401,8 @@ class PyFOrg(QMainWindow):
 					# Column 0 is the header column
 					first_child = item.child(0)
 					item_folder_name = os.path.join(output_folder, first_child.item_data.cleared_name.title())
-					print("Item output dir: '%s'" % (item_folder_name, ))
 
 					if not os.access(item_folder_name, os.F_OK):
-						print("need to make dir")
 						os.mkdir(item_folder_name)
 
 					for child_idx in range(child_cnt):
@@ -396,11 +416,9 @@ class PyFOrg(QMainWindow):
 					if child_checked == Qt.Checked:
 						source_fn = child.item_data.src_fqpath
 						dest_fn   = child.item_data.dest_fqpath
-						print("Should move from '%s' to '%s'" % (source_fn, dest_fn))
 						if os.access(dest_fn, os.F_OK):
-							print("destination file already exists!")
+							self.set_status_text("Destination file %s already exists!" % (dest_fn, ))
 						elif os.access(source_fn, os.F_OK):
-							print("Move would be OK?")
 							shutil.move(source_fn, dest_fn)
 						else:
-							print("what? Cannot access source?")
+							self.set_status_text("Cannot access source file %s!" % (source_fn, ))

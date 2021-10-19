@@ -17,8 +17,9 @@ class ConfigObj(object):
 		self.brackets                  = True
 		self.parentheses               = True
 		self.curly_braces              = True
+		self.duplicate_segments        = True
+		self.file_extensions           = True
 
-		self.duplicate_segments       = True
 
 		self.mapping_dict              = {}
 		self.sort_from_dir             = "~/"
@@ -47,6 +48,7 @@ class ConfigObj(object):
 		config["parentheses"]               = self.parentheses
 		config["curly_braces"]              = self.curly_braces
 		config["duplicate_segments"]        = self.duplicate_segments
+		config["file_extensions"]           = self.file_extensions
 
 		return config
 
@@ -67,6 +69,7 @@ class ConfigObj(object):
 		self.parentheses                = config["parentheses"]
 		self.curly_braces               = config["curly_braces"]
 		self.duplicate_segments         = config["duplicate_segments"]
+		self.file_extensions            = config["file_extensions"]
 
 		return
 
@@ -87,6 +90,7 @@ class ConfigObj(object):
 			'sort_to_dir',
 			'enable_sort_to_dir',
 			'duplicate_segments',
+			'file_extensions',
 		]
 		assert key in ok_keys, "Trying to set invalid key '%s'" % key
 
