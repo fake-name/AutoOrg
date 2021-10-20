@@ -16,7 +16,7 @@ block_cipher = None
 
 
 a = Analysis(['main.py'],
-			pathex=['C:/code/pyFOrg/PyFOrg-v2'],
+			pathex=['C:/code/pyFOrg'],
 			binaries=None,
 			datas=None,
 			hiddenimports=[
@@ -110,7 +110,7 @@ if ONEFILE:
 				a.zipfiles,
 				a.datas,
 				# exclude_binaries=True,
-				name    = 'PyFOrg - {ver}.exe'.format(ver=version),
+				name    = 'AutoOrg - {ver}.exe'.format(ver=version),
 				debug   = False,
 				strip   = None,
 				upx     = False,
@@ -121,7 +121,7 @@ else:
 	exe = EXE(pyz,
 			  a.scripts,
 			  exclude_binaries=True,
-				name    = 'PyFOrg - {ver}.exe'.format(ver=version),
+				name    = 'AutoOrg - {ver}.exe'.format(ver=version),
 			  strip=None,
 			  upx=False,
 			  debug=1,
@@ -133,4 +133,4 @@ else:
 				   a.datas,
 				   strip=None,
 				   upx=False,
-				   name='PyFOrg')
+				   name='AutoOrg')
