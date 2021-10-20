@@ -1,25 +1,13 @@
-import os.path
 # To change this template, choose Tools | Templates
 # and open the template in the editor.
-import sys
-import os
-import re
-import math
-import Levenshtein as Lv
-import timeit
-import numpy as np
+import os.path
 import tempfile
-
-import wx
+import Levenshtein as Lv
+import numpy as np
 
 import h5py
 from . import filename_container
 from . import config
-
-
-	#def __repr__(self):
-	#	return (repr((self.fn, self.cn, self.pairs)))
-
 
 
 class NonComutativeMatrix(object):

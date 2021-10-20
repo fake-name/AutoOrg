@@ -1,18 +1,11 @@
-# To change this template, choose Tools | Templates
-# and open the template in the editor.
+
 import os
 import os.path
-import Levenshtein as Lv
-import numpy as np
 
 
 from . import comutative_matrix
 from . import filename_container
 from . import config
-
-
-	#def __repr__(self):
-	#	return (repr((self.fn, self.cn, self.pairs)))
 
 
 

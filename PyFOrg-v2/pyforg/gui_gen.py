@@ -228,39 +228,64 @@ class Ui_MainWidget(object):
 
         self.verticalLayout_4 = QVBoxLayout()
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
+
+        self.verticalLayout_3.addLayout(self.verticalLayout_4)
+
+        self.gridLayout_2 = QGridLayout()
+        self.gridLayout_2.setObjectName(u"gridLayout_2")
+        self.strip_extensions_checkbox = QCheckBox(self.settings_tab)
+        self.strip_extensions_checkbox.setObjectName(u"strip_extensions_checkbox")
+
+        self.gridLayout_2.addWidget(self.strip_extensions_checkbox, 2, 1, 1, 1)
+
+        self.strip_single_letters_no_i_checkbox = QCheckBox(self.settings_tab)
+        self.strip_single_letters_no_i_checkbox.setObjectName(u"strip_single_letters_no_i_checkbox")
+
+        self.gridLayout_2.addWidget(self.strip_single_letters_no_i_checkbox, 4, 0, 1, 1)
+
         self.config_tab_filename_cleaner_bracket_remval_static_text = QLabel(self.settings_tab)
         self.config_tab_filename_cleaner_bracket_remval_static_text.setObjectName(u"config_tab_filename_cleaner_bracket_remval_static_text")
         self.config_tab_filename_cleaner_bracket_remval_static_text.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignTop)
 
-        self.verticalLayout_4.addWidget(self.config_tab_filename_cleaner_bracket_remval_static_text)
+        self.gridLayout_2.addWidget(self.config_tab_filename_cleaner_bracket_remval_static_text, 0, 0, 1, 1)
+
+        self.strip_vol_chapter_strings_checkbox = QCheckBox(self.settings_tab)
+        self.strip_vol_chapter_strings_checkbox.setObjectName(u"strip_vol_chapter_strings_checkbox")
+
+        self.gridLayout_2.addWidget(self.strip_vol_chapter_strings_checkbox, 3, 1, 1, 1)
 
         self.text_clean_parentheses_checkbox = QCheckBox(self.settings_tab)
         self.text_clean_parentheses_checkbox.setObjectName(u"text_clean_parentheses_checkbox")
 
-        self.verticalLayout_4.addWidget(self.text_clean_parentheses_checkbox)
-
-        self.text_clean_brackets_checkbox = QCheckBox(self.settings_tab)
-        self.text_clean_brackets_checkbox.setObjectName(u"text_clean_brackets_checkbox")
-
-        self.verticalLayout_4.addWidget(self.text_clean_brackets_checkbox)
-
-        self.text_clean_curly_brackets_checkbox = QCheckBox(self.settings_tab)
-        self.text_clean_curly_brackets_checkbox.setObjectName(u"text_clean_curly_brackets_checkbox")
-
-        self.verticalLayout_4.addWidget(self.text_clean_curly_brackets_checkbox)
+        self.gridLayout_2.addWidget(self.text_clean_parentheses_checkbox, 1, 0, 1, 1)
 
         self.repeated_filename_checkbox = QCheckBox(self.settings_tab)
         self.repeated_filename_checkbox.setObjectName(u"repeated_filename_checkbox")
 
-        self.verticalLayout_4.addWidget(self.repeated_filename_checkbox)
+        self.gridLayout_2.addWidget(self.repeated_filename_checkbox, 1, 1, 1, 1)
 
-        self.strip_extensions_checkbox = QCheckBox(self.settings_tab)
-        self.strip_extensions_checkbox.setObjectName(u"strip_extensions_checkbox")
+        self.strip_digits_checkbox = QCheckBox(self.settings_tab)
+        self.strip_digits_checkbox.setObjectName(u"strip_digits_checkbox")
 
-        self.verticalLayout_4.addWidget(self.strip_extensions_checkbox)
+        self.gridLayout_2.addWidget(self.strip_digits_checkbox, 4, 1, 1, 1)
+
+        self.text_clean_brackets_checkbox = QCheckBox(self.settings_tab)
+        self.text_clean_brackets_checkbox.setObjectName(u"text_clean_brackets_checkbox")
+
+        self.gridLayout_2.addWidget(self.text_clean_brackets_checkbox, 2, 0, 1, 1)
+
+        self.text_clean_curly_brackets_checkbox = QCheckBox(self.settings_tab)
+        self.text_clean_curly_brackets_checkbox.setObjectName(u"text_clean_curly_brackets_checkbox")
+
+        self.gridLayout_2.addWidget(self.text_clean_curly_brackets_checkbox, 3, 0, 1, 1)
+
+        self.strip_single_letters_including_i_checkbox = QCheckBox(self.settings_tab)
+        self.strip_single_letters_including_i_checkbox.setObjectName(u"strip_single_letters_including_i_checkbox")
+
+        self.gridLayout_2.addWidget(self.strip_single_letters_including_i_checkbox, 5, 0, 1, 1)
 
 
-        self.verticalLayout_3.addLayout(self.verticalLayout_4)
+        self.verticalLayout_3.addLayout(self.gridLayout_2)
 
         self.verticalSpacer_2 = QSpacerItem(10, 10, QSizePolicy.Minimum, QSizePolicy.Fixed)
 
@@ -399,12 +424,16 @@ class Ui_MainWidget(object):
         self.config_tab_filename_cleaner_heading_static_text.setText(QCoreApplication.translate("MainWidget", u"Text Strip List", None))
         self.strip_list_doc_label.setText(QCoreApplication.translate("MainWidget", u"Colon (:) separated list of terms to remove from filenames before comparing. Case insensitive.\n"
 "Note: Be certain to not leave any spurious spaces, they may disrupt text removal.", None))
+        self.strip_extensions_checkbox.setText(QCoreApplication.translate("MainWidget", u"Filename Extensions", None))
+        self.strip_single_letters_no_i_checkbox.setText(QCoreApplication.translate("MainWidget", u"Single Letters (excluding capital \"I\")", None))
         self.config_tab_filename_cleaner_bracket_remval_static_text.setText(QCoreApplication.translate("MainWidget", u"Clean:", None))
+        self.strip_vol_chapter_strings_checkbox.setText(QCoreApplication.translate("MainWidget", u"Volume/Chapter tags (\"ch?/d+\", \"v(ol)?d+\")", None))
         self.text_clean_parentheses_checkbox.setText(QCoreApplication.translate("MainWidget", u"Text in Parentheses - ()", None))
+        self.repeated_filename_checkbox.setText(QCoreApplication.translate("MainWidget", u"Repeated Filenames", None))
+        self.strip_digits_checkbox.setText(QCoreApplication.translate("MainWidget", u"All Numbers", None))
         self.text_clean_brackets_checkbox.setText(QCoreApplication.translate("MainWidget", u"Text in Square Brackets - []", None))
         self.text_clean_curly_brackets_checkbox.setText(QCoreApplication.translate("MainWidget", u"Text in Curly Braces - {}", None))
-        self.repeated_filename_checkbox.setText(QCoreApplication.translate("MainWidget", u"Repeated Filenames", None))
-        self.strip_extensions_checkbox.setText(QCoreApplication.translate("MainWidget", u"Filename Extensions", None))
+        self.strip_single_letters_including_i_checkbox.setText(QCoreApplication.translate("MainWidget", u"Single Letters (including capital \"I\")", None))
         self.confing_tab_comp_engine_label.setText(QCoreApplication.translate("MainWidget", u"Comparison Engine Variables", None))
         self.label_word_length_weighting.setText(QCoreApplication.translate("MainWidget", u"Word Length Weighting", None))
         self.value_word_length_weighting.setText(QCoreApplication.translate("MainWidget", u"1.000", None))

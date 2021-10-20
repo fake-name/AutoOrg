@@ -7,9 +7,6 @@ import Levenshtein as Lv
 import numpy as np
 
 
-
-
-
 def compStr(strA, strB):
 	'''
 	Compare two strings. Do some fancy things to allow word transposition
@@ -64,7 +61,6 @@ class Filename():
 	gid = None
 
 	def __init__(self, filename, config, id_num, containing_dir):
-		self.similarity_cache = None
 		self.__id_no = id_num
 
 		#print "PreClean", filename
@@ -75,17 +71,30 @@ class Filename():
 			temp_cleaned = re.sub(r"\(.*?\)", " ", temp_cleaned)
 		if config.curly_braces:
 			temp_cleaned = re.sub(r"\{.*?\}", " ", temp_cleaned)
+		if config.file_extensions:
+			temp_cleaned, _ = os.path.splitext(temp_cleaned)
 
 		#print "PostClean", temp_cleaned
 		temp_cleaned = re.sub("'", "", temp_cleaned)
 		temp_cleaned = re.sub("’", "", temp_cleaned)
+		temp_cleaned = re.sub('"', "", temp_cleaned)
 		#remove punctuation cleanly (')apostrophes
 
-		temp_cleaned = re.sub(r"\.rar|\.zip|\.cbr|\.cbz|\.7z|\.jpg|\.png|\.epub", " ", temp_cleaned, re.IGNORECASE)	#remove known file suffixes
-		temp_cleaned = re.sub(r"([\[\]_\+0-9()=!,])", " ", temp_cleaned)				#clean brackets, symbols, and numbers: Removed "-"
-		temp_cleaned = re.sub(r"\W(ch|vol)[0-9]+?", " ", temp_cleaned)				#Clean 'ch01' or similar
-		temp_cleaned = re.sub(r"\W[vc][0-9]*?\W", " ", temp_cleaned)				#Clean 'v01' and 'c01' or similar
-		# temp_cleaned = re.sub(r"\W[a-zA-z0-9]\W", " ", temp_cleaned)				#Remove all single letters
+
+		if config.strip_digits:
+			temp_cleaned = re.sub(r"[0-9]", " ", temp_cleaned)				#clean brackets, symbols, and numbers: Removed "-"
+
+		if config.strip_single_letters_including_i:
+			temp_cleaned = re.sub(r"\W[a-zA-Z]\W", " ", temp_cleaned)				#Remove all single letters
+		elif config.strip_single_letters_no_i:
+			temp_cleaned = re.sub(r"\W[a-zA-HJ-Z]\W", " ", temp_cleaned)				#Remove all single letters, except I
+
+
+		if config.strip_vol_chapter_strings:
+			temp_cleaned = re.sub(r"\W(ch|vol)[0-9]+?", " ", temp_cleaned)				#Clean 'ch01' or similar
+			temp_cleaned = re.sub(r"\W[vc][0-9]*?\W", " ", temp_cleaned)				#Clean 'v01' and 'c01' or similar
+
+		temp_cleaned = re.sub(r"([\[\]_\+()=!,])", " ", temp_cleaned)				#clean brackets, symbols
 
 		for term in [t for t in config.strip_terms if t]:
 			tempRE = re.compile(term, re.IGNORECASE)

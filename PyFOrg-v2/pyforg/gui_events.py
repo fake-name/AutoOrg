@@ -1,7 +1,6 @@
 # This Python file uses the following encoding: utf-8
 import shutil
 import traceback
-import pickle
 import os
 import json
 from PySide2.QtWidgets import QMessageBox
@@ -38,6 +37,26 @@ class PyFOrg(QMainWindow):
 		self.setCentralWidget(main_widget)
 		self.load_config()
 		self.bind_signals()
+
+		self.req_comp_widgets = [
+			self.gui.comp_threshold_slider,
+			self.gui.expand_tree,
+			self.gui.expand_checked_tree_items,
+			self.gui.check_all_tree_items,
+			self.gui.collapse_checked_tree_items,
+			self.gui.collapse_tree,
+			self.gui.uncheck_all_tree_items,
+			self.gui.collapse_unchecked_tree_items,
+			self.gui.expand_unchecked_tree_items,
+			self.gui.button_check_items,
+			self.gui.button_move_files,
+		]
+
+		self.enable_comp_widgets(False)
+
+	def enable_comp_widgets(self, enable):
+		for widget in self.req_comp_widgets:
+			widget.setEnabled(enable)
 
 	def setup_status_bar(self):
 
@@ -76,10 +95,13 @@ class PyFOrg(QMainWindow):
 		self.gui.text_clean_parentheses_checkbox          .setChecked(self.config.parentheses)
 		self.gui.text_clean_brackets_checkbox             .setChecked(self.config.brackets)
 		self.gui.text_clean_curly_brackets_checkbox       .setChecked(self.config.curly_braces)
-
 		self.gui.repeated_filename_checkbox               .setChecked(self.config.duplicate_segments)
 		self.gui.strip_extensions_checkbox                .setChecked(self.config.file_extensions)
 
+		self.gui.strip_single_letters_no_i_checkbox       .setChecked(self.config.strip_single_letters_no_i)
+		self.gui.strip_single_letters_including_i_checkbox.setChecked(self.config.strip_single_letters_including_i)
+		self.gui.strip_vol_chapter_strings_checkbox       .setChecked(self.config.strip_vol_chapter_strings)
+		self.gui.strip_digits_checkbox                    .setChecked(self.config.strip_digits)
 
 		# Update the labels
 		self.handler_threshold_slider_adjusted(None)
@@ -94,11 +116,15 @@ class PyFOrg(QMainWindow):
 
 		self.gui.slider_num_file_for_checking           .valueChanged.connect(self.handler_check_slider_changed)
 
-		self.gui.text_clean_parentheses_checkbox   .stateChanged.connect(self.handler_update_checkboxes_config)
-		self.gui.text_clean_brackets_checkbox      .stateChanged.connect(self.handler_update_checkboxes_config)
-		self.gui.text_clean_curly_brackets_checkbox.stateChanged.connect(self.handler_update_checkboxes_config)
-		self.gui.repeated_filename_checkbox        .stateChanged.connect(self.handler_update_checkboxes_config)
-		self.gui.strip_extensions_checkbox         .stateChanged.connect(self.handler_update_checkboxes_config)
+		self.gui.text_clean_parentheses_checkbox          .stateChanged.connect(self.handler_update_checkboxes_config)
+		self.gui.text_clean_brackets_checkbox             .stateChanged.connect(self.handler_update_checkboxes_config)
+		self.gui.text_clean_curly_brackets_checkbox       .stateChanged.connect(self.handler_update_checkboxes_config)
+		self.gui.repeated_filename_checkbox               .stateChanged.connect(self.handler_update_checkboxes_config)
+		self.gui.strip_extensions_checkbox                .stateChanged.connect(self.handler_update_checkboxes_config)
+		self.gui.strip_single_letters_no_i_checkbox       .stateChanged.connect(self.handler_update_checkboxes_config)
+		self.gui.strip_single_letters_including_i_checkbox.stateChanged.connect(self.handler_update_checkboxes_config)
+		self.gui.strip_vol_chapter_strings_checkbox       .stateChanged.connect(self.handler_update_checkboxes_config)
+		self.gui.strip_digits_checkbox                    .stateChanged.connect(self.handler_update_checkboxes_config)
 
 		self.gui.filename_cleaner_text_ctrl.editingFinished.connect(self.handler_text_entry_fields)
 		self.gui.sort_source_location      .editingFinished.connect(self.handler_text_entry_fields)
@@ -185,18 +211,22 @@ class PyFOrg(QMainWindow):
 		self.gui.slider_num_file_for_checking_label.setText("%s" % val)
 
 	def handler_update_checkboxes_config(self, _event):
-		self.config.parentheses        = self.gui.text_clean_parentheses_checkbox   .isChecked()
-		self.config.brackets           = self.gui.text_clean_brackets_checkbox      .isChecked()
-		self.config.curly_braces       = self.gui.text_clean_curly_brackets_checkbox.isChecked()
-		self.config.duplicate_segments = self.gui.repeated_filename_checkbox        .isChecked()
-		self.config.file_extensions    = self.gui.strip_extensions_checkbox         .isChecked()
+		self.config.parentheses                         = self.gui.text_clean_parentheses_checkbox          .isChecked()
+		self.config.brackets                            = self.gui.text_clean_brackets_checkbox             .isChecked()
+		self.config.curly_braces                        = self.gui.text_clean_curly_brackets_checkbox       .isChecked()
+		self.config.duplicate_segments                  = self.gui.repeated_filename_checkbox               .isChecked()
+		self.config.file_extensions                     = self.gui.strip_extensions_checkbox                .isChecked()
+		self.config.strip_single_letters_no_i           = self.gui.strip_single_letters_no_i_checkbox       .isChecked()
+		self.config.strip_single_letters_including_i    = self.gui.strip_single_letters_including_i_checkbox.isChecked()
+		self.config.strip_vol_chapter_strings           = self.gui.strip_vol_chapter_strings_checkbox       .isChecked()
+		self.config.strip_digits                        = self.gui.strip_digits_checkbox                    .isChecked()
 
 	def handler_threshold_slider_changed(self):
 		try:
 			assert self.compar
 			self.set_status_text("Recomputing similarity tree")
 			trimmed_dict = self.compar.trimTree(self.config.getCompThresh())
-			self.set_status_text("Trimming Tree")
+			self.set_status_text("Trimmed tree contains %s items" % (len(trimmed_dict), ))
 			#print "Adding Tree"
 			#print trimmed_dict
 			self.add_dict_to_tree(trimmed_dict)
@@ -251,12 +281,22 @@ class PyFOrg(QMainWindow):
 		else:
 			self.compar.sort(self.config.sort_from_dir)
 
+		self.set_status_text("Sort Complete")
+
 		trimmed_dict = self.compar.trimTree(self.config.getCompThresh())
 
 		#print trimmed_dict
 		if len(trimmed_dict) < 1:
 			self.set_status_text("No items. Either folder is empty or thresholds are set incorrectly.")
+		else:
+			self.set_status_text("Trimmed tree contains %s items" % (len(trimmed_dict), ))
+
+
 		self.add_dict_to_tree(trimmed_dict)
+
+
+
+		self.enable_comp_widgets(True)
 
 
 	def handler_check_items_with_threshold(self, _event):
@@ -371,13 +411,13 @@ class PyFOrg(QMainWindow):
 
 
 	def handler_move_selected_items_into_new_folders(self, _event):
-		file_source_dir = self.gui.sort_source_location.text()
 
 		if self.config.enable_sort_to_dir:
 			output_folder = self.config.sort_to_dir
 		else:
 			output_folder = QFileDialog.getExistingDirectory(self,
-				caption = 'Select directory to create new folders in'
+				caption = 'Select directory to create new folders in',
+				dir = self.config.last_move_to_dir,
 				)
 
 		if not output_folder:
@@ -385,8 +425,12 @@ class PyFOrg(QMainWindow):
 			msg_box.setText("No output folder! How did this happen?")
 			msg_box.exec_()
 			return
+		self.config.last_move_to_dir = output_folder
 
 		self.set_status_text("Item count: %s" % self.gui.file_tree.topLevelItemCount())
+		moved = 0
+		errors = 0
+		already_existing = 0
 
 		for root_idx in range(self.gui.file_tree.topLevelItemCount()):
 			item = self.gui.file_tree.topLevelItem(root_idx)
@@ -417,8 +461,17 @@ class PyFOrg(QMainWindow):
 						source_fn = child.item_data.src_fqpath
 						dest_fn   = child.item_data.dest_fqpath
 						if os.access(dest_fn, os.F_OK):
+							already_existing += 1
 							self.set_status_text("Destination file %s already exists!" % (dest_fn, ))
 						elif os.access(source_fn, os.F_OK):
 							shutil.move(source_fn, dest_fn)
+							moved += 1
 						else:
+							errors += 1
 							self.set_status_text("Cannot access source file %s!" % (source_fn, ))
+
+		self.set_status_text("Moved %s files, encountered %s errors and skipped moving %s files as they already exist." % (moved, errors, already_existing))
+
+		# And then clear the tree, so any changes need to be re-applied
+		# self.gui.file_tree.clear()
+		# self.enable_comp_widgets(False)

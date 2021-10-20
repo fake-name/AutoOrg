@@ -339,8 +339,25 @@ Note: Be certain to not leave any spurious spaces, they may disrupt text removal
         </spacer>
        </item>
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout_4">
-         <item>
+        <layout class="QVBoxLayout" name="verticalLayout_4"/>
+       </item>
+       <item>
+        <layout class="QGridLayout" name="gridLayout_2">
+         <item row="2" column="1">
+          <widget class="QCheckBox" name="strip_extensions_checkbox">
+           <property name="text">
+            <string>Filename Extensions</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QCheckBox" name="strip_single_letters_no_i_checkbox">
+           <property name="text">
+            <string>Single Letters (excluding capital &quot;I&quot;)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
           <widget class="QLabel" name="config_tab_filename_cleaner_bracket_remval_static_text">
            <property name="text">
             <string>Clean:</string>
@@ -350,38 +367,52 @@ Note: Be certain to not leave any spurious spaces, they may disrupt text removal
            </property>
           </widget>
          </item>
-         <item>
+         <item row="3" column="1">
+          <widget class="QCheckBox" name="strip_vol_chapter_strings_checkbox">
+           <property name="text">
+            <string>Volume/Chapter tags (&quot;ch?/d+&quot;, &quot;v(ol)?d+&quot;)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
           <widget class="QCheckBox" name="text_clean_parentheses_checkbox">
            <property name="text">
             <string>Text in Parentheses - ()</string>
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="QCheckBox" name="text_clean_brackets_checkbox">
-           <property name="text">
-            <string>Text in Square Brackets - []</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="text_clean_curly_brackets_checkbox">
-           <property name="text">
-            <string>Text in Curly Braces - {}</string>
-           </property>
-          </widget>
-         </item>
-         <item>
+         <item row="1" column="1">
           <widget class="QCheckBox" name="repeated_filename_checkbox">
            <property name="text">
             <string>Repeated Filenames</string>
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="QCheckBox" name="strip_extensions_checkbox">
+         <item row="4" column="1">
+          <widget class="QCheckBox" name="strip_digits_checkbox">
            <property name="text">
-            <string>Filename Extensions</string>
+            <string>All Numbers</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QCheckBox" name="text_clean_brackets_checkbox">
+           <property name="text">
+            <string>Text in Square Brackets - []</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QCheckBox" name="text_clean_curly_brackets_checkbox">
+           <property name="text">
+            <string>Text in Curly Braces - {}</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="0">
+          <widget class="QCheckBox" name="strip_single_letters_including_i_checkbox">
+           <property name="text">
+            <string>Single Letters (including capital &quot;I&quot;)</string>
            </property>
           </widget>
          </item>
