@@ -27,7 +27,7 @@ class ConfigObj(object):
 		self.sort_from_dir             = "~/"
 		self.last_move_to_dir          = "~/"
 		self.sort_to_dir               = ""
-		self.enable_sort_to_dir        = True
+		self.enable_sort_to_dir        = False
 
 
 	def getCompThresh(self):
