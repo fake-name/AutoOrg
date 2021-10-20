@@ -4,5 +4,7 @@
 /wxGlade/*.bak
 __pycache__
 config.json
-/PyFOrg-v2/config.json
-/PyFOrg-v2/cache.pik
+config.json
+cache.pik
+build
+dist
