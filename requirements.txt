@@ -1,0 +1,5 @@
+
+PySide2==5.15.2
+Levenshtein==0.15.0
+numpy==1.21.3
+h5py==3.5.0
