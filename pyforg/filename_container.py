@@ -74,6 +74,9 @@ class Filename():
 		if config.file_extensions:
 			temp_cleaned, _ = os.path.splitext(temp_cleaned)
 
+
+		# temp_cleaned = re.sub(r"[0-9a-f]{32}", " ", temp_cleaned)
+
 		#print "PostClean", temp_cleaned
 		temp_cleaned = re.sub("'", "", temp_cleaned)
 		temp_cleaned = re.sub("’", "", temp_cleaned)

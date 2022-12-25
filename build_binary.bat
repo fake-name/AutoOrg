@@ -1,3 +1,3 @@
 
 
-pyinstaller main.spec --log-level=DEBUG --noconfirm --strip
+pyinstaller main.spec --log-level=DEBUG --noconfirm

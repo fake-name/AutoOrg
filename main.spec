@@ -20,6 +20,7 @@ a = Analysis(['main.py'],
 			binaries=None,
 			datas=None,
 			hiddenimports=[
+				'PySide2.QtWidgets',
 				],
 			hookspath=None,
 			runtime_hooks=None,
